@@ -7,11 +7,22 @@
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
+		<link rel="stylesheet" href="/index.css" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<header>
+			<h1><img src="/titleFont.png"></h1>
+			<section>
+				<a href="/blackjack"><img src="/shop.svg" alt="Add chips"></a>
+				<a href="/auth0.astro"><img src="/accountIcon.svg" alt="Account"></a>
+			</section>
+		</header>
+		<main>
+			<button><a href="blackjack">Join Blackjack</a></button>
+			<button>Host Game</button>
+		</main>
 	</body>
 </html>
