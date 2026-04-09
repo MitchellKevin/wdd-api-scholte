@@ -1,0 +1,48 @@
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg,#0b0b0b,#081015);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-image: url('/bg.png');
+  background-size: cover;
+}
+
+.poker-stage {
+  width: 980px;
+  max-width: 96vw;
+  padding: 28px;
+}
+
+.poker-header {
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;
+}
+
+.table-area {
+  background: linear-gradient(180deg,#133e2d,#0f2b1f);
+  padding: 16px;border-radius:12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+
+#community { display:flex; gap:12px; margin:12px 0; }
+#hand { display:flex; gap:12px; margin:12px 0; }
+
+.card { width:72px;height:98px;border-radius:10px;background:#fff;color:#111;display:flex;flex-direction:column;justify-content:space-between;padding:6px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,0.45); }
+.card.small { width:60px;height:82px;padding:4px; }
+.card .rank{ font-size:18px }
+.card .suit{ font-size:18px }
+
+#playerList { margin-bottom:12px }
+
+.controls { display:flex; gap:12px; align-items:center; margin-top:12px }
+.controls button{ padding:8px 12px;border-radius:8px;border:0;background:#2d8b5b;color:#fff;cursor:pointer }
+.controls button[disabled]{ opacity:0.5; cursor:not-allowed }
+
+@media (max-width:720px){ .poker-stage{ padding:12px } .card{ width:56px;height:78px } }

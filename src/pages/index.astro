@@ -17,12 +17,44 @@
 			<h1><img src="/titleFont.png"></h1>
 			<section>
 				<a href="/blackjack"><img src="/shop.svg" alt="Add chips"></a>
-				<a href="/auth0.astro"><img src="/accountIcon.svg" alt="Account"></a>
+				<a href="/poker"><img src="/accountIcon.svg" alt="Account"></a>
 			</section>
 		</header>
 		<main>
-			<button><a href="blackjack">Join Blackjack</a></button>
-			<button>Host Game</button>
+			<button id="joinBtn">Join Game</button>
+			<button id="hostBtn">Host Game</button>
 		</main>
+
+		<script>
+		// Prompt for a room (name/number) and navigate to the table page with ?room=
+		const joinBtn = document.getElementById('joinBtn');
+		const hostBtn = document.getElementById('hostBtn');
+
+		if (joinBtn) {
+			joinBtn.addEventListener('click', () => {
+				let room = prompt('Voer kamer-nummer in om te joinen (alleen cijfers):');
+				if (!room) return;
+				room = room.trim();
+				if (!/^[0-9]+$/.test(room)){
+					alert('Gebruik alleen cijfers voor het kamer-nummer.');
+					return;
+				}
+				location.href = '/table?room=' + encodeURIComponent(room);
+			});
+		}
+
+		if (hostBtn) {
+			hostBtn.addEventListener('click', () => {
+				let room = prompt('Maak een kamer aan: voer een uniek kamer-nummer in (alleen cijfers):');
+				if (!room) return;
+				room = room.trim();
+				if (!/^[0-9]+$/.test(room)){
+					alert('Gebruik alleen cijfers voor het kamer-nummer.');
+					return;
+				}
+				location.href = '/table?room=' + encodeURIComponent(room) + '&host=1';
+			});
+		}
+		</script>
 	</body>
 </html>

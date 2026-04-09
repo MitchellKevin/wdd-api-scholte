@@ -1,0 +1,70 @@
+---
+---
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Poker — Texas Hold'em</title>
+  <link rel="stylesheet" href="/poker.css">
+  <style>
+      .card{ display:inline-block; padding:6px 8px; border:1px solid #ccc; margin:4px; border-radius:6px; }
+      #playerList { margin-bottom:12px; }
+      #community { margin-bottom:12px; }
+    </style>
+  </head>
+  <body>
+    <h1>Texas Hold'em (multiplayer prototype)</h1>
+    <div>Room: <span id="roomId">(none)</span></div>
+
+    <section>
+      <h3>Players</h3>
+      <div id="playerList">(none yet)</div>
+    </section>
+
+    <section>
+      <h3>Community</h3>
+      <div id="community"></div>
+    </section>
+
+    <section>
+      <h3>Your hand</h3>
+      <div id="hand"></div>
+    </section>
+
+    <div>
+      <label>Name: <input id="name"></label>
+      <button id="joinBtn">Join</button>
+      <button id="dealBtn">Deal (host)</button>
+      <button id="nextBtn">Next street</button>
+      <button id="foldBtn">Fold</button>
+      <div id="message"></div>
+    </div>
+
+    <script>
+      const p = new URLSearchParams(location.search);
+      const room = p.get('room') || prompt('Room id?');
+      const roomSpan = document.getElementById('roomId');
+      if (roomSpan && room) roomSpan.textContent = room;
+
+      const joinBtn = document.getElementById('joinBtn');
+      if (joinBtn) {
+        joinBtn.addEventListener('click', () => {
+          const nameEl = document.getElementById('name') as HTMLInputElement | null;
+          const name = (nameEl?.value && nameEl.value.trim()) || ('Guest-' + Math.random().toString(36).slice(2,6));
+          (window as any).pokerConnect(room, name, false);
+          const messageEl = document.getElementById('message');
+          if (messageEl) messageEl.textContent = 'Joining...';
+        });
+      }
+
+      const dealBtn = document.getElementById('dealBtn');
+      if (dealBtn) dealBtn.addEventListener('click', () => { (window as any).pokerAction('DEAL'); });
+      const nextBtn = document.getElementById('nextBtn');
+      if (nextBtn) nextBtn.addEventListener('click', () => { (window as any).pokerAction('NEXT'); });
+      const foldBtn = document.getElementById('foldBtn');
+      if (foldBtn) foldBtn.addEventListener('click', () => { (window as any).pokerAction('FOLD'); });
+    </script>
+    <script type="module" src="/poker.js"></script>
+  </body>
+</html>

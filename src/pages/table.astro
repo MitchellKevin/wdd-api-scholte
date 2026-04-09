@@ -1,0 +1,136 @@
+---
+---
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Table</title>
+    <style>
+      body { font-family: system-ui, sans-serif; padding: 20px; }
+      #status { margin-bottom: 10px; }
+      #players { margin-top: 10px; }
+      .player { padding: 6px 8px; border: 1px solid #ddd; margin: 4px 0; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <h2>Game Table</h2>
+    <div id="status">Connecting...</div>
+    <div>Room: <span id="roomId"></span></div>
+
+    <div id="players">
+      <h3>Players</h3>
+      <div id="list"></div>
+    </div>
+
+    <div id="joinArea" style="margin-top:12px">
+      <label>Naam: <input id="playerName" type="text" placeholder="Your name"></label>
+      <button id="joinTableBtn">Join Table</button>
+    </div>
+
+    <script>
+      // read room from query string
+      const params = new URLSearchParams(location.search);
+      const room = params.get('room');
+      const roomSpan = document.getElementById('roomId');
+      if (roomSpan) roomSpan.textContent = room || '(none)';
+
+      const isHost = params.get('host') === '1';
+
+      if (!room) {
+        const statusEl = document.getElementById('status');
+        if (statusEl) statusEl.textContent = 'No room specified. Go back and enter a room id.';
+        throw new Error('No room');
+      }
+
+      const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsUrl = wsProto + '://' + location.host + '/ws';
+      const socket = new WebSocket(wsUrl);
+
+      socket.addEventListener('open', () => {
+        const statusEl = document.getElementById('status');
+        if (statusEl) statusEl.textContent = 'Connected';
+        // wait for user to click Join (so they can provide a name)
+      });
+
+      // join UI
+      const joinArea = document.getElementById('joinArea');
+  const nameInput = document.getElementById('playerName');
+  const nameInputEl = (nameInput && nameInput instanceof HTMLInputElement) ? nameInput : null;
+      const joinBtn = document.getElementById('joinTableBtn');
+      if (nameInputEl && isHost) {
+        nameInputEl.value = 'Host-' + Math.random().toString(36).slice(2,5);
+      }
+
+      function doJoin(){
+        let name = 'Guest-' + Math.random().toString(36).slice(2,6);
+        if (nameInputEl && typeof nameInputEl.value === 'string' && nameInputEl.value.trim().length) name = nameInputEl.value.trim();
+        const payload = JSON.stringify({ type: 'JOIN_TABLE', tableId: room, displayName: name, host: isHost });
+
+        // try to send join message if socket is open, otherwise send when open,
+        // but do not block navigation: always navigate immediately so the user can play.
+        try {
+          if (socket && socket.readyState === 1) {
+            socket.send(payload);
+            console.log('JOIN_TABLE sent', payload);
+          } else if (socket) {
+            socket.addEventListener('open', () => { try{ socket.send(payload); console.log('JOIN_TABLE sent after open'); }catch(e){} }, { once: true });
+          }
+        } catch (e) { console.warn('Could not send JOIN_TABLE before redirect', e); }
+
+        if (joinArea) joinArea.style.display = 'none';
+        const rid = room || '';
+        const url = '/blackjack?room=' + encodeURIComponent(rid) + '&name=' + encodeURIComponent(name) + (isHost? '&host=1' : '');
+        location.href = url;
+      }
+
+      if (joinBtn) joinBtn.addEventListener('click', doJoin);
+
+      // optionally allow Enter to join
+      if (nameInput) nameInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') doJoin(); });
+
+      socket.addEventListener('message', (ev) => {
+        let msg;
+        try { msg = JSON.parse(ev.data); } catch { return; }
+
+        if (msg.type === 'WELCOME') {
+          // ignore
+          return;
+        }
+
+        if (msg.type === 'TABLE_UPDATE') {
+          const list = document.getElementById('list');
+          if (list) {
+            list.innerHTML = '';
+            const players = msg.players || [];
+            // ensure hosts are shown first: build host array then others
+            const hosts = [];
+            const others = [];
+            for (let i = 0; i < players.length; i++) {
+              const p = players[i];
+              if (p && p.isHost) hosts.push(p); else others.push(p);
+            }
+            const ordered = hosts.concat(others);
+            for (let i = 0; i < ordered.length; i++) {
+              const p = ordered[i];
+              const d = document.createElement('div');
+              d.className = 'player';
+              d.textContent = (p && p.displayName ? p.displayName : 'Unknown') + (p && p.isHost ? ' (host)' : '');
+              list.appendChild(d);
+            }
+          }
+        }
+
+        if (msg.type === 'ERROR') {
+          const statusEl = document.getElementById('status');
+          if (statusEl) statusEl.textContent = 'Error: ' + msg.message;
+        }
+      });
+
+      socket.addEventListener('close', () => {
+        const statusEl = document.getElementById('status');
+        if (statusEl) statusEl.textContent = 'Disconnected';
+      });
+    </script>
+  </body>
+</html>

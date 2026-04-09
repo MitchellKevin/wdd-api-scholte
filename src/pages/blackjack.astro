@@ -29,6 +29,11 @@
         </div>
       </section>
 
+      <aside style="margin-top:16px;">
+        <h3>Players at table</h3>
+        <div id="playerList">(none yet)</div>
+      </aside>
+
       <section class="controls">
         <div class="bet">
           <label>Bet: $<input id="betAmount" type="number" min="1" value="50"></label>
@@ -43,6 +48,23 @@
       </section>
     </main>
 
-    <script type="module" src="/blackjack.js"></script>
+      <script>
+        // expose URL params to blackjack.js
+        const _BJ_PARAMS = (function(){
+          const p = new URLSearchParams(location.search);
+          return { room: p.get('room') || '', name: p.get('name') || '', host: p.get('host') === '1' };
+        })();
+        // show player name and room in header if present
+        (function(){
+          const params = _BJ_PARAMS;
+          if(params && params.name){
+            const label = document.createElement('div'); label.className = 'player-label';
+            label.textContent = 'Player: ' + params.name + (params.host ? ' (host)' : '');
+            const header = document.querySelector('.bj-header'); if(header) header.appendChild(label);
+          }
+        })();
+      </script>
+
+      <script type="module" src="/blackjack.js"></script>
   </body>
 </html>
