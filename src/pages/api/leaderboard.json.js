@@ -1,6 +1,6 @@
 import { getTopScores } from '../../../server/db.js';
 
-export function get(){
+export function GET(){
   try{
     const top = getTopScores(10);
     return new Response(JSON.stringify({ top }), { status: 200 });

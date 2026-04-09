@@ -1,4 +1,4 @@
-// Minimal in-memory Texas Hold'em manager
+// Minimal in-memory Texas Hold'em manager (single implementation)
 
 const tables = new Map();
 
@@ -36,7 +36,7 @@ function snapshot(tableId){
   return {
     phase: t.phase,
     community: (t.community || []).slice(),
-    players: t.players.map(p=>({ id: p.id, displayName: p.displayName, isHost: p.isHost, hand: p.hand.slice(), folded: !!p.folded }))
+    players: t.players.map(p=>({ id: p.id, displayName: p.displayName, isHost: p.isHost, hand: (p.hand||[]).slice(), folded: !!p.folded }))
   };
 }
 
@@ -69,8 +69,7 @@ function startHand(tableId){
 function nextStreet(tableId){
   const t = tables.get(tableId); if(!t) return null;
   if(t.phase === 'preflop'){
-    // flop: burn one, deal 3
-    // simple: just deal 3
+    // flop: deal 3
     t.community.push(t.deck.pop(), t.deck.pop(), t.deck.pop());
     t.phase = 'flop';
   } else if(t.phase === 'flop'){

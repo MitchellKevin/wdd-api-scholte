@@ -22,7 +22,12 @@ function renderPackages(){
 
 async function createPayment(packageId){
   try{
-    const res = await fetch('/api/create-payment.json', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ packageId }) });
+    // include auth token if available so the server can attach the purchase to the user
+    let headers = { 'Content-Type': 'application/json' };
+    if(window.getAuthToken) {
+      try{ const t = await window.getAuthToken(); if(t) headers['Authorization'] = `Bearer ${t}`; }catch(e){}
+    }
+    const res = await fetch('/api/create-payment.json', { method: 'POST', headers, body: JSON.stringify({ packageId }) });
     const j = await res.json();
     if(res.ok && j.paymentUrl){
       // redirect to payment URL (stub or real provider)

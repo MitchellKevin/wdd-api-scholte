@@ -45,6 +45,35 @@ let player = { hand: [] };
 let bank = 1000;
 let bet = 50;
 
+async function getAuthToken(){
+  if(typeof window.getAuthToken === 'function'){
+    try{ return await window.getAuthToken(); }catch(e){ return localStorage.getItem('token'); }
+  }
+  return localStorage.getItem('token');
+}
+
+async function loadBalance(){
+  try{
+    const token = await getAuthToken();
+    if(!token) return;
+    const res = await fetch('/api/balance', { method: 'GET', headers: { 'Authorization': 'Bearer ' + token } });
+    if(!res.ok) return;
+    const j = await res.json();
+    if(j && typeof j.balance === 'number'){
+      bank = j.balance;
+      if(bankEl) bankEl.textContent = String(bank);
+    }
+  }catch(e){ console.warn('loadBalance failed', e); }
+}
+
+async function saveBalance(){
+  try{
+    const token = await getAuthToken();
+    if(!token) return;
+    await fetch('/api/balance', { method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token }, body: JSON.stringify({ balance: bank }) });
+  }catch(e){ console.warn('saveBalance failed', e); }
+}
+
 // read join params if provided (from /table redirect)
 const BJ_PARAMS = (typeof window !== 'undefined' && window._BJ_PARAMS) ? window._BJ_PARAMS : { room: '', name: '', host: false };
 if (BJ_PARAMS && BJ_PARAMS.name) {
@@ -100,6 +129,8 @@ function resetTable(){
 function dealInitial(){
   bet = Math.max(1, Math.min(bank, Number(betInput.value) || 1));
   bank -= bet; bankEl.textContent = String(bank);
+  // persist bank change
+  saveBalance();
 
   player.hand.push(deck.pop());
   dealer.hand.push(deck.pop());
@@ -171,6 +202,8 @@ function finishHand(){
 
   bankEl.textContent = String(bank);
   messageEl.textContent = outcome;
+  // persist updated bank
+  saveBalance();
 }
 
 // event bindings
@@ -194,6 +227,9 @@ async function loadLeaderboard(){
 
 // refresh leaderboard periodically
 loadLeaderboard(); setInterval(loadLeaderboard, 30_000);
+
+// load persisted balance for logged-in user
+document.addEventListener('DOMContentLoaded', ()=>{ loadBalance().catch(()=>{}); });
 
 // if arrived via join, auto-deal a hand for convenience
 try{
