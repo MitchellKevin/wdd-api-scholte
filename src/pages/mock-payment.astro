@@ -1,0 +1,35 @@
+---
+// Simple mock payment landing page for testing the shop flow.
+---
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Payment</title>
+    <style>body{font-family:system-ui, -apple-system, sans-serif;padding:24px} button{padding:10px 14px;border-radius:8px;background:#0b6cff;color:white;border:0}</style>
+  </head>
+  <body>
+    <h1>Mock Payment Page</h1>
+    <p id="info"></p>
+    <p>
+      <button id="complete">Simulate successful payment</button>
+    </p>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const session = params.get('session');
+      const pkg = params.get('pkg');
+      const infoEl = document.getElementById('info');
+      const completeBtn = document.getElementById('complete');
+      if(infoEl) infoEl.textContent = `Session: ${session} — Package: ${pkg}`;
+      if(completeBtn) completeBtn.addEventListener('click', async ()=>{
+        // call webhook stub to simulate Mollie webhook sending payment success
+        const res = await fetch('/api/payment-webhook.json', { method: 'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ session, packageId: pkg, status: 'paid' }) });
+        const j = await res.json();
+        alert('Webhook response: ' + JSON.stringify(j));
+        // go back to shop
+        location.href = '/shop';
+      });
+    </script>
+  </body>
+</html>

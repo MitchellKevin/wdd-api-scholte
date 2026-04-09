@@ -1,0 +1,8 @@
+---
+import { getLoginUrl } from '../lib/auth';
+
+const state = crypto.randomUUID();   // CSRF protection
+Astro.cookies.set('oauth_state', state, { httpOnly: true, path: '/' });
+
+return Astro.redirect(getLoginUrl(state));
+---

@@ -176,6 +176,25 @@ function finishHand(){
 // event bindings
 resetTable();
 
+async function loadLeaderboard(){
+  try{
+    const res = await fetch('/api/leaderboard.json');
+    const j = await res.json();
+    const el = document.getElementById('leaderboard');
+    if(!el) return;
+    if(!j.top || j.top.length===0){ el.textContent = '(no scores yet)'; return; }
+    el.innerHTML = '';
+    j.top.forEach(row=>{
+      const d = document.createElement('div');
+      d.textContent = (row.userSub ? row.userSub : 'anon') + ': $' + row.score;
+      el.appendChild(d);
+    });
+  }catch(e){ console.warn('load leaderboard failed', e); }
+}
+
+// refresh leaderboard periodically
+loadLeaderboard(); setInterval(loadLeaderboard, 30_000);
+
 // if arrived via join, auto-deal a hand for convenience
 try{
   if(BJ_PARAMS && BJ_PARAMS.name){

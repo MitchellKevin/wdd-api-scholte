@@ -1,0 +1,38 @@
+---
+// Simple shop page for buying coin packages. Backend payment integration (Mollie)
+// will be wired later; this page calls a stub API that returns a payment URL.
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop — Buy Coins</title>
+    <link rel="stylesheet" href="/poker.css" />
+    <style>
+      .shop { max-width:900px; margin:36px auto; padding:20px; }
+      .packages { display:flex; flex-wrap:wrap; gap:16px; }
+      .pkg { background:linear-gradient(180deg,#fff,#f7f7f8); border:1px solid #e6e6e8; padding:18px; border-radius:12px; width:220px; box-shadow:0 6px 18px rgba(20,20,30,0.06); }
+      .pkg h3{ margin:0 0 8px 0; font-size:18px }
+      .pkg .coins{ font-weight:700; color:#2b2b2b; font-size:20px }
+      .pkg .price{ margin-top:8px; font-size:16px; color:#444 }
+      .pkg button{ margin-top:12px; display:block; width:100%; padding:10px 12px; border-radius:8px; background:#0b6cff; color:#fff; border:0; cursor:pointer }
+      .pkg button[disabled]{ background:#99b8ff; cursor:default }
+      .note{ margin-top:18px; color:#666 }
+    </style>
+  </head>
+  <body>
+    <main class="shop">
+      <h1>Coin Shop</h1>
+      <p>Buy coins to play — payment will be handled by Mollie (integration pending). This page uses a stubbed API now so you can test the flow.</p>
+
+      <section class="packages" id="packages">
+        <!-- packages injected by client script -->
+      </section>
+
+      <p class="note">Note: After purchase is implemented the server will credit your account when the payment is confirmed.</p>
+    </main>
+
+    <script type="module" src="/shop.js"></script>
+  </body>
+</html>
