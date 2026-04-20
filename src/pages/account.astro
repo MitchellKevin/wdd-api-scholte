@@ -6,7 +6,7 @@
     <title>Account — Blackjack</title>
     <style>
       * { box-sizing:border-box; font-family:Inter, system-ui, sans-serif; }
-      body { display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#1a1a2e; }
+      body { display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background-image: url('./bg.png'); background-size: cover;  }
       .card { background:#16213e; border:1px solid #0f3460; border-radius:16px; padding:36px 40px; width:100%; max-width:420px; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
       h2 { margin:0 0 24px 0; color:#e2e2e2; font-size:24px; text-align:center; }
       .row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #0f3460; color:#ccc; font-size:15px; }
@@ -49,7 +49,7 @@
         if (!res.ok) { localStorage.removeItem('token'); document.getElementById('not-logged').style.display = 'block'; return; }
         const me = await res.json();
         document.getElementById('user-name').textContent = me.username;
-        document.getElementById('user-coins').textContent = (me.coins_amount ?? 0).toLocaleString('nl-NL') + ' 🪙';
+        document.getElementById('user-coins').textContent = (me.coins_amount ?? 0).toLocaleString('nl-NL');
         document.getElementById('user-created').textContent = me.createdAt ? new Date(me.createdAt).toLocaleDateString('nl-NL') : '–';
         document.getElementById('account-card').style.display = 'block';
       }

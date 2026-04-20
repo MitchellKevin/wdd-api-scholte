@@ -1,11 +1,12 @@
 import { WebSocketServer } from 'ws';
 import { verifyTokenRaw } from '../lib/auth.js';
-import * as gm from './gameManager.js';
+import * as gameManager from './gameManager.js';
 import { creditCoins, deductCoins } from './db.js';
 
+// Keeps track of all connected clients
 const clients = new Map();
 
-function genId() {
+function generateClientId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
@@ -13,99 +14,66 @@ export function attachWebSocket(httpServer) {
   const wss = new WebSocketServer({ server: httpServer });
 
   wss.on('connection', (socket) => {
-    const clientId = genId();
+    const clientId = generateClientId();
     clients.set(clientId, { socket, roomId: null, userId: null, username: null });
+
+    // Tell the client their assigned ID
     safeSend(socket, { type: 'WELCOME', clientId });
 
     socket.on('message', async (raw) => {
-      let msg;
-      try { msg = JSON.parse(String(raw)); } catch { return; }
-      await handleMessage(clientId, msg);
+      let message;
+      try {
+        message = JSON.parse(String(raw));
+      } catch {
+        return; // Ignore invalid JSON
+      }
+      await handleMessage(clientId, message);
     });
 
     socket.on('close', async () => {
-      const c = clients.get(clientId);
-      if (c?.roomId) {
-        gm.removePlayer(c.roomId, clientId);
-        broadcastRoom(c.roomId);
+      const client = clients.get(clientId);
+
+      if (client?.roomId) {
+        gameManager.removePlayer(client.roomId, clientId);
+        broadcastRoomUpdate(client.roomId);
       }
+
       clients.delete(clientId);
     });
   });
 
-  async function handleMessage(clientId, msg) {
-    if (!msg?.type) return;
+  // ─── Message handler ──────────────────────────────────────────────────────
+
+  async function handleMessage(clientId, message) {
+    if (!message?.type) return;
+
     const client = clients.get(clientId);
     if (!client) return;
 
-    switch (msg.type) {
-      case 'JOIN_ROOM': {
-        const payload = verifyTokenRaw(msg.token);
-        if (!payload) { sendErr(clientId, 'Niet ingelogd'); return; }
-        const roomId = String(msg.roomId || '').trim();
-        if (!roomId || !/^\d+$/.test(roomId)) { sendErr(clientId, 'Ongeldig kamer-nummer (alleen cijfers)'); return; }
-        if (client.roomId) { gm.removePlayer(client.roomId, clientId); broadcastRoom(client.roomId); }
-        client.roomId = roomId;
-        client.userId = payload.sub;
-        client.username = payload.username;
-        const result = gm.addPlayer(roomId, clientId, payload.sub, payload.username);
-        if (result.error) { client.roomId = null; sendErr(clientId, result.error); return; }
-        broadcastRoom(roomId);
+    switch (message.type) {
+      case 'JOIN_ROOM':
+        await handleJoinRoom(clientId, client, message);
         break;
-      }
 
-      case 'START_GAME': {
-        if (!client.roomId) return;
-        const result = gm.startGame(client.roomId, clientId);
-        if (result.error) { sendErr(clientId, result.error); return; }
-        broadcastRoom(client.roomId);
+      case 'START_GAME':
+        handleStartGame(clientId, client);
         break;
-      }
 
-      case 'PLACE_BET': {
-        if (!client.roomId) return;
-        const amount = parseInt(msg.amount, 10);
-        if (!amount || amount < 1) { sendErr(clientId, 'Ongeldige inzet'); return; }
-        const deducted = await deductCoins(client.userId, amount);
-        if (!deducted) { sendErr(clientId, 'Niet genoeg coins'); return; }
-        const result = gm.placeBet(client.roomId, clientId, amount);
-        if (result.error) {
-          await creditCoins(client.userId, amount);
-          sendErr(clientId, result.error); return;
-        }
-        const room = gm.getRoom(client.roomId);
-        if (room?.phase === 'results') await creditIfNeeded(room);
-        broadcastRoom(client.roomId);
+      case 'PLACE_BET':
+        await handlePlaceBet(clientId, client, message);
         break;
-      }
 
-      case 'HIT': {
-        if (!client.roomId) return;
-        const result = gm.hit(client.roomId, clientId);
-        if (result.error) { sendErr(clientId, result.error); return; }
-        const room = gm.getRoom(client.roomId);
-        if (room?.phase === 'results') await creditIfNeeded(room);
-        broadcastRoom(client.roomId);
+      case 'HIT':
+        await handleHit(clientId, client);
         break;
-      }
 
-      case 'STAND': {
-        if (!client.roomId) return;
-        const result = gm.stand(client.roomId, clientId);
-        if (result.error) { sendErr(clientId, result.error); return; }
-        const room = gm.getRoom(client.roomId);
-        if (room?.phase === 'results') await creditIfNeeded(room);
-        broadcastRoom(client.roomId);
+      case 'STAND':
+        await handleStand(clientId, client);
         break;
-      }
 
-      case 'PLAY_AGAIN': {
-        if (!client.roomId) return;
-        const result = gm.startGame(client.roomId, clientId);
-        if (result.error) { sendErr(clientId, result.error); return; }
-        broadcastRoom(client.roomId);
+      case 'PLAY_AGAIN':
+        handlePlayAgain(clientId, client);
         break;
-      }
 
       case 'PING':
         safeSend(client.socket, { type: 'PONG' });
@@ -113,30 +81,168 @@ export function attachWebSocket(httpServer) {
     }
   }
 
-  async function creditIfNeeded(room) {
-    if (room.winsCredited) return;
-    gm.markWinsCredited(room.id);
-    for (const p of room.players) {
-      if (p.winAmount > 0) await creditCoins(p.userId, p.winAmount);
+  // ─── Action handlers ──────────────────────────────────────────────────────
+
+  async function handleJoinRoom(clientId, client, message) {
+    const payload = verifyTokenRaw(message.token);
+    if (!payload) {
+      sendError(clientId, 'Niet ingelogd');
+      return;
     }
+
+    const roomId = String(message.roomId || '').trim();
+    if (!roomId || !/^\d+$/.test(roomId)) {
+      sendError(clientId, 'Ongeldig kamer-nummer (alleen cijfers)');
+      return;
+    }
+
+    // Leave current room before joining a new one
+    if (client.roomId) {
+      gameManager.removePlayer(client.roomId, clientId);
+      broadcastRoomUpdate(client.roomId);
+    }
+
+    client.roomId = roomId;
+    client.userId = payload.sub;
+    client.username = payload.username;
+
+    const result = gameManager.addPlayer(roomId, clientId, payload.sub, payload.username);
+    if (result.error) {
+      client.roomId = null;
+      sendError(clientId, result.error);
+      return;
+    }
+
+    broadcastRoomUpdate(roomId);
   }
 
-  function broadcastRoom(roomId) {
-    const snap = gm.snapshot(roomId);
-    if (!snap) return;
-    for (const [, c] of clients) {
-      if (c.roomId === roomId) {
-        safeSend(c.socket, { type: 'ROOM_UPDATE', ...snap, myUsername: c.username });
+  function handleStartGame(clientId, client) {
+    if (!client.roomId) return;
+
+    const result = gameManager.startGame(client.roomId, clientId);
+    if (result.error) {
+      sendError(clientId, result.error);
+      return;
+    }
+
+    broadcastRoomUpdate(client.roomId);
+  }
+
+  async function handlePlaceBet(clientId, client, message) {
+    if (!client.roomId) return;
+
+    const amount = parseInt(message.amount, 10);
+    if (!amount || amount < 1) {
+      sendError(clientId, 'Ongeldige inzet');
+      return;
+    }
+
+    // Deduct coins before confirming the bet
+    const coinsDeducted = await deductCoins(client.userId, amount);
+    if (!coinsDeducted) {
+      sendError(clientId, 'Niet genoeg coins');
+      return;
+    }
+
+    const result = gameManager.placeBet(client.roomId, clientId, amount);
+    if (result.error) {
+      // Refund the coins if the bet was rejected
+      await creditCoins(client.userId, amount);
+      sendError(clientId, result.error);
+      return;
+    }
+
+    const room = gameManager.getRoom(client.roomId);
+    if (room?.phase === 'results') {
+      await creditWinnings(room);
+    }
+
+    broadcastRoomUpdate(client.roomId);
+  }
+
+  async function handleHit(clientId, client) {
+    if (!client.roomId) return;
+
+    const result = gameManager.hit(client.roomId, clientId);
+    if (result.error) {
+      sendError(clientId, result.error);
+      return;
+    }
+
+    const room = gameManager.getRoom(client.roomId);
+    if (room?.phase === 'results') {
+      await creditWinnings(room);
+    }
+
+    broadcastRoomUpdate(client.roomId);
+  }
+
+  async function handleStand(clientId, client) {
+    if (!client.roomId) return;
+
+    const result = gameManager.stand(client.roomId, clientId);
+    if (result.error) {
+      sendError(clientId, result.error);
+      return;
+    }
+
+    const room = gameManager.getRoom(client.roomId);
+    if (room?.phase === 'results') {
+      await creditWinnings(room);
+    }
+
+    broadcastRoomUpdate(client.roomId);
+  }
+
+  function handlePlayAgain(clientId, client) {
+    if (!client.roomId) return;
+
+    const result = gameManager.startGame(client.roomId, clientId);
+    if (result.error) {
+      sendError(clientId, result.error);
+      return;
+    }
+
+    broadcastRoomUpdate(client.roomId);
+  }
+
+  // ─── Utilities ────────────────────────────────────────────────────────────
+
+  async function creditWinnings(room) {
+    if (room.winsCredited) return;
+
+    gameManager.markWinsCredited(room.id);
+
+    for (const player of room.players) {
+      if (player.winAmount > 0) {
+        await creditCoins(player.userId, player.winAmount);
       }
     }
   }
 
-  function sendErr(clientId, message) {
-    const c = clients.get(clientId);
-    if (c) safeSend(c.socket, { type: 'ERROR', message });
+  function broadcastRoomUpdate(roomId) {
+    const roomSnapshot = gameManager.snapshot(roomId);
+    if (!roomSnapshot) return;
+
+    for (const [, client] of clients) {
+      if (client.roomId === roomId) {
+        safeSend(client.socket, { type: 'ROOM_UPDATE', ...roomSnapshot, myUsername: client.username });
+      }
+    }
   }
 
-  function safeSend(socket, msg) {
-    try { socket.send(JSON.stringify(msg)); } catch {}
+  function sendError(clientId, message) {
+    const client = clients.get(clientId);
+    if (client) {
+      safeSend(client.socket, { type: 'ERROR', message });
+    }
+  }
+
+  function safeSend(socket, message) {
+    try {
+      socket.send(JSON.stringify(message));
+    } catch {
+      // Client disconnected mid-send, ignore
+    }
   }
 }

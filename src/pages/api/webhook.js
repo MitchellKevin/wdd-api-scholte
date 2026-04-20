@@ -8,7 +8,7 @@ export async function POST({ request }) {
     const id = params.get('id');
     if (!id) return new Response('ok', { status: 200 });
 
-    const mollie = mollieClient({ apiKey: process.env.MOLLIE_API_KEY });
+    const mollie = mollieClient({ apiKey: import.meta.env.MOLLIE_API_KEY });
     const molliePayment = await mollie.payments.get(id);
 
     if (!molliePayment.isPaid()) return new Response('ok', { status: 200 });

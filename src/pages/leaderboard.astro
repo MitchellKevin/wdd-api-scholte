@@ -6,7 +6,7 @@
     <title>Leaderboard — Blackjack</title>
     <style>
       * { box-sizing: border-box; font-family: Inter, system-ui, sans-serif; }
-      body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #1a1a2e; padding: 24px; }
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-image: url('./bg.png'); background-size: cover;  padding: 24px; }
       .card { background: #16213e; border: 1px solid #0f3460; border-radius: 16px; padding: 36px 40px; width: 100%; max-width: 520px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
       h2 { margin: 0 0 8px 0; color: #e2e2e2; font-size: 24px; text-align: center; }
       .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
@@ -78,7 +78,7 @@
 
             const coinsEl = document.createElement('span');
             coinsEl.className = 'coins';
-            coinsEl.textContent = p.coins_amount.toLocaleString('nl-NL') + ' 🪙';
+            coinsEl.textContent = p.coins_amount.toLocaleString('nl-NL');
 
             row.appendChild(rankEl);
             row.appendChild(nameEl);

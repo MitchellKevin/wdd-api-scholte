@@ -1,6 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { getDB } from './mongodb.js';
 
+// ─── Coins ────────────────────────────────────────────────────────────────────
+
 export async function getBalance(userId) {
   const db = await getDB();
   const user = await db.collection('users').findOne(
@@ -28,12 +30,18 @@ export async function creditCoins(userId, amount) {
 
 export async function deductCoins(userId, amount) {
   const db = await getDB();
+
+  // Only deduct if the user has enough coins ($gte = greater than or equal)
   const result = await db.collection('users').updateOne(
     { _id: new ObjectId(userId), coins_amount: { $gte: amount } },
     { $inc: { coins_amount: -amount } }
   );
-  return result.modifiedCount === 1;
+
+  const success = result.modifiedCount === 1;
+  return success;
 }
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
 
 export async function createPayment(data) {
   const db = await getDB();
@@ -53,6 +61,8 @@ export async function markPaymentPaid(mollieId) {
     { $set: { status: 'paid', paidAt: new Date() } }
   );
 }
+
+// ─── Leaderboard ──────────────────────────────────────────────────────────────
 
 export async function getTopPlayers(limit = 10) {
   const db = await getDB();
