@@ -1,60 +1,109 @@
 ---
-
 ---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Blackjack</title>
+    <link rel="stylesheet" href="/index.css" />
+    <style>
+      .lobby { display:flex; flex-direction:column; align-items:center; gap:20px; margin-top:40px; }
+      .user-bar { color:#aaa; font-size:14px; }
+      .user-bar strong { color:#ffd700; }
+      .room-form { display:flex; gap:10px; }
+      .room-form input { padding:10px 14px; border-radius:8px; border:1px solid #0f3460; background:#0d1b2a; color:#e2e2e2; font-size:16px; width:160px; text-align:center; }
+      .room-form input:focus { outline:none; border-color:#e94560; }
+      .btn { padding:11px 24px; border-radius:8px; border:0; font-size:15px; font-weight:600; cursor:pointer; }
+      .btn-join { background:#2d8b5b; color:#fff; }
+      .btn-host { background:#e94560; color:#fff; }
+      .not-logged { text-align:center; margin-top:60px; color:#aaa; }
+      .not-logged a { color:#e94560; text-decoration:none; font-weight:600; }
+      .not-logged a:hover { text-decoration:underline; }
+      #msg { color:#ff6b6b; font-size:14px; min-height:20px; }
+      .daily-badge { background:#1a3a1a; border:1px solid #2d8b5b; color:#6bff91; padding:8px 16px; border-radius:8px; font-size:14px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><img src="/titleFont.png" alt="Blackjack"></h1>
+      <section>
+        <a href="/shop"><img src="/shop.svg" alt="Shop"></a>
+        <a href="/account"><img src="/accountIcon.svg" alt="Account"></a>
+      </section>
+    </header>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<link rel="stylesheet" href="/index.css" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<header>
-			<h1><img src="/titleFont.png"></h1>
-			<section>
-				<a href="/shop"><img src="/shop.svg" alt="Add chips"></a>
-				<a href="/auth"><img src="/accountIcon.svg" alt="Account"></a>
-			</section>
-		</header>
-		<main>
-			<button id="joinBtn">Join Game</button>
-			<button id="hostBtn">Host Game</button>
-		</main>
+    <div id="logged-in" style="display:none">
+      <div class="lobby">
+        <div class="user-bar">Welkom, <strong id="username">–</strong> &nbsp;|&nbsp; Coins: <strong id="coins">–</strong></div>
+        <div id="daily-msg" class="daily-badge" style="display:none"></div>
+        <div class="room-form">
+          <input id="roomInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Kamer-nummer" maxlength="8" />
+          <button class="btn btn-join" id="joinBtn">Join</button>
+          <button class="btn btn-host" id="hostBtn">Host</button>
+        </div>
+        <div id="msg"></div>
+      </div>
+    </div>
 
-		<script>
-		// Prompt for a room (name/number) and navigate to the table page with ?room=
-		const joinBtn = document.getElementById('joinBtn');
-		const hostBtn = document.getElementById('hostBtn');
+    <div id="not-logged" class="not-logged" style="display:none">
+      <p>Maak een account aan of log in om te spelen.</p>
+      <p style="margin-top:12px;">
+        <a href="/login">Inloggen</a> &nbsp;|&nbsp; <a href="/signup">Registreren</a>
+      </p>
+    </div>
 
-		if (joinBtn) {
-			joinBtn.addEventListener('click', () => {
-				let room = prompt('Voer kamer-nummer in om te joinen (alleen cijfers):');
-				if (!room) return;
-				room = room.trim();
-				if (!/^[0-9]+$/.test(room)){
-					alert('Gebruik alleen cijfers voor het kamer-nummer.');
-					return;
-				}
-				location.href = '/table?room=' + encodeURIComponent(room);
-			});
-		}
+    <script>
+      function loadUser() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          document.getElementById('not-logged')?.style && (document.getElementById('not-logged').style.display = 'block');
+          document.getElementById('logged-in')?.style && (document.getElementById('logged-in').style.display = 'none');
+          return;
+        }
+        fetch('/api/me', { headers: { Authorization: 'Bearer ' + token } })
+          .then(r => r.ok ? r.json() : Promise.reject())
+          .then(d => {
+            const usernameEl = document.getElementById('username');
+            const coinsEl = document.getElementById('coins');
+            const loggedIn = document.getElementById('logged-in');
+            if (usernameEl) usernameEl.textContent = d.username;
+            if (coinsEl) coinsEl.textContent = (d.coins_amount ?? 0).toLocaleString('nl-NL');
+            if (loggedIn) loggedIn.style.display = 'block';
+          })
+          .catch(() => { localStorage.removeItem('token'); location.reload(); });
+      }
 
-		if (hostBtn) {
-			hostBtn.addEventListener('click', () => {
-				let room = prompt('Maak een kamer aan: voer een uniek kamer-nummer in (alleen cijfers):');
-				if (!room) return;
-				room = room.trim();
-				if (!/^[0-9]+$/.test(room)){
-					alert('Gebruik alleen cijfers voor het kamer-nummer.');
-					return;
-				}
-				location.href = '/table?room=' + encodeURIComponent(room) + '&host=1';
-			});
-		}
-		</script>
-	</body>
+      loadUser();
+
+      // Re-fetch when navigating back (bfcache restore)
+      window.addEventListener('pageshow', (e) => {
+        if (e.persisted) loadUser();
+      });
+
+      {
+
+        // Show daily reward message if just logged in
+        const dailyMsg = sessionStorage.getItem('dailyReward');
+        if (dailyMsg) {
+          const el = document.getElementById('daily-msg');
+          if (el) { el.textContent = dailyMsg; el.style.display = 'block'; }
+          sessionStorage.removeItem('dailyReward');
+        }
+      }
+
+      function goToRoom(host) {
+        const room = document.getElementById('roomInput').value.trim();
+        const msg = document.getElementById('msg');
+        if (!room || !/^\d+$/.test(room)) { msg.textContent = 'Gebruik alleen cijfers voor het kamer-nummer.'; return; }
+        msg.textContent = '';
+        location.href = '/blackjack?room=' + encodeURIComponent(room);
+      }
+
+      document.getElementById('joinBtn')?.addEventListener('click', () => goToRoom(false));
+      document.getElementById('hostBtn')?.addEventListener('click', () => goToRoom(true));
+      document.getElementById('roomInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') goToRoom(false); });
+    </script>
+  </body>
 </html>

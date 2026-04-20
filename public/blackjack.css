@@ -90,6 +90,7 @@ body {
 
 .controls button {
     padding: 8px 12px;
+    margin: 5px;
     border-radius: 8px;
     border: 0;
     background: #2d8b5b;

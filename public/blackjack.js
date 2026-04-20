@@ -42,44 +42,50 @@ function makeCardEl(card){
 let deck = [];
 let dealer = { hand: [] };
 let player = { hand: [] };
-let bank = 1000;
+let bank = 0;
 let bet = 50;
+let pendingSave = null;
 
-async function getAuthToken(){
-  if(typeof window.getAuthToken === 'function'){
-    try{ return await window.getAuthToken(); }catch(e){ return localStorage.getItem('token'); }
-  }
-  return localStorage.getItem('token');
+function getToken() {
+  try { return localStorage.getItem('token'); } catch(e) { return null; }
 }
 
 async function loadBalance(){
   try{
-    const token = await getAuthToken();
+    const token = getToken();
     if(!token) return;
-    const res = await fetch('/api/balance', { method: 'GET', headers: { 'Authorization': 'Bearer ' + token } });
+    const res = await fetch('/api/balance.json', { method: 'GET', headers: { 'Authorization': 'Bearer ' + token } });
     if(!res.ok) return;
     const j = await res.json();
     if(j && typeof j.balance === 'number'){
       bank = j.balance;
-      if(bankEl) bankEl.textContent = String(bank);
+      if(bankEl) bankEl.textContent = bank.toLocaleString('nl-NL');
+      if(dealBtn) dealBtn.disabled = false;
     }
   }catch(e){ console.warn('loadBalance failed', e); }
 }
 
-async function saveBalance(){
-  try{
-    const token = await getAuthToken();
-    if(!token) return;
-    await fetch('/api/balance', { method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token }, body: JSON.stringify({ balance: bank }) });
-  }catch(e){ console.warn('saveBalance failed', e); }
+function saveBalance(){
+  const token = getToken();
+  if(!token) return Promise.resolve();
+  pendingSave = window.pendingSave = fetch('/api/balance.json', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ balance: bank })
+  }).then(r => {
+    if(!r.ok) console.warn('saveBalance HTTP error', r.status);
+    else console.log('saveBalance ok, bank =', bank);
+  }).catch(e => console.warn('saveBalance failed', e));
+  return pendingSave;
 }
 
-// read join params if provided (from /table redirect)
-const BJ_PARAMS = (typeof window !== 'undefined' && window._BJ_PARAMS) ? window._BJ_PARAMS : { room: '', name: '', host: false };
-if (BJ_PARAMS && BJ_PARAMS.name) {
-  // show small welcome
-  if (typeof messageEl !== 'undefined' && messageEl) messageEl.textContent = 'Welcome ' + BJ_PARAMS.name + (BJ_PARAMS.host ? ' (host)' : '');
-}
+// // read join params if provided (from /table redirect)
+// const BJ_PARAMS = (typeof window !== 'undefined' && window._BJ_PARAMS) ? window._BJ_PARAMS : { room: '', name: '', host: false };
+// if (BJ_PARAMS && BJ_PARAMS.name) {
+//   // show small welcome
+//   if (typeof messageEl !== 'undefined' && messageEl) messageEl.textContent = 'Welcome ' + BJ_PARAMS.name + (BJ_PARAMS.host ? ' (host)' : '');
+// }
 
 const dealerHandEl = document.getElementById('dealerHand');
 const playerHandEl = document.getElementById('playerHand');
@@ -128,9 +134,7 @@ function resetTable(){
 
 function dealInitial(){
   bet = Math.max(1, Math.min(bank, Number(betInput.value) || 1));
-  bank -= bet; bankEl.textContent = String(bank);
-  // persist bank change
-  saveBalance();
+  bank -= bet; bankEl.textContent = bank.toLocaleString('nl-NL');
 
   player.hand.push(deck.pop());
   dealer.hand.push(deck.pop());
@@ -200,132 +204,132 @@ function finishHand(){
   else if(pv > dv){ outcome = 'You win!'; bank += bet*2; }
   else { outcome = 'Dealer wins'; }
 
-  bankEl.textContent = String(bank);
+  bankEl.textContent = bank.toLocaleString('nl-NL');
   messageEl.textContent = outcome;
-  // persist updated bank
   saveBalance();
 }
 
 // event bindings
 resetTable();
+loadBalance().catch(() => {});
 
-async function loadLeaderboard(){
-  try{
-    const res = await fetch('/api/leaderboard.json');
-    const j = await res.json();
-    const el = document.getElementById('leaderboard');
-    if(!el) return;
-    if(!j.top || j.top.length===0){ el.textContent = '(no scores yet)'; return; }
-    el.innerHTML = '';
-    j.top.forEach(row=>{
-      const d = document.createElement('div');
-      d.textContent = (row.userSub ? row.userSub : 'anon') + ': $' + row.score;
-      el.appendChild(d);
-    });
-  }catch(e){ console.warn('load leaderboard failed', e); }
-}
+// async function loadLeaderboard(){
+//   try{
+//     const res = await fetch('/api/leaderboard.json');
+//     const j = await res.json();
+//     const el = document.getElementById('leaderboard');
+//     if(!el) return;
+//     if(!j.top || j.top.length===0){ el.textContent = '(no scores yet)'; return; }
+//     el.innerHTML = '';
+//     j.top.forEach(row=>{
+//       const d = document.createElement('div');
+//       d.textContent = (row.userSub ? row.userSub : 'anon') + ': $' + row.score;
+//       el.appendChild(d);
+//     });
+//   }catch(e){ console.warn('load leaderboard failed', e); }
+// }
 
-// refresh leaderboard periodically
-loadLeaderboard(); setInterval(loadLeaderboard, 30_000);
+// // refresh leaderboard periodically
+// loadLeaderboard(); setInterval(loadLeaderboard, 30_000);
 
-// load persisted balance for logged-in user
-document.addEventListener('DOMContentLoaded', ()=>{ loadBalance().catch(()=>{}); });
+// // load persisted balance for logged-in user
+// document.addEventListener('DOMContentLoaded', ()=>{ loadBalance().catch(()=>{}); });
 
-// if arrived via join, auto-deal a hand for convenience
-try{
-  if(BJ_PARAMS && BJ_PARAMS.name){
-    // small delay to let UI render
-    setTimeout(()=>{
-      if (dealBtn && !dealBtn.disabled) {
-        dealBtn.click();
-      } else if (dealBtn) {
-        // enable and click
-        dealBtn.disabled = false; dealBtn.click();
-      }
-    }, 250);
-  }
-}catch(e){ /* ignore */ }
+// // if arrived via join, auto-deal a hand for convenience
+// try{
+//   if(BJ_PARAMS && BJ_PARAMS.name){
+//     // small delay to let UI render
+//     setTimeout(()=>{
+//       if (dealBtn && !dealBtn.disabled) {
+//         dealBtn.click();
+//       } else if (dealBtn) {
+//         // enable and click
+//         dealBtn.disabled = false; dealBtn.click();
+//       }
+//     }, 250);
+//   }
+// }catch(e){ /* ignore */ }
 
-// Multiplayer: if room provided, connect to server and use server state
-let socket = null;
-let isMultiplayer = !!(BJ_PARAMS && BJ_PARAMS.room);
-let myClientId = null;
-let lastRawMsgEl = null;
+// // Multiplayer: if room provided, connect to server and use server state
+// let socket = null;
+// let isMultiplayer = !!(BJ_PARAMS && BJ_PARAMS.room);
+// let myClientId = null;
+// let lastRawMsgEl = null;
 
-function applySnapshot(snap){
-  if(!snap) return;
-  // render dealer
-  dealer.hand = snap.dealer ? (snap.dealer.hand || []) : [];
-  // find our player by client id (fallback to name)
-  let me = null;
-  if (snap.clientId && snap.players) me = (snap.players || []).find(p => p.id === snap.clientId);
-  if(!me) me = (snap.players || []).find(p => p.displayName === (BJ_PARAMS && BJ_PARAMS.name));
-  if(me){ player.hand = me.hand.slice(); }
-  // else if not found, keep local
-  renderHands(snap.phase !== 'finished');
-  dealerScoreEl.textContent = dealer.hand ? String(handValue(dealer.hand)) : '-';
-  playerScoreEl.textContent = player.hand ? String(handValue(player.hand)) : '0';
-  // show message
-  if(snap.phase === 'finished'){
-    messageEl.textContent = 'Round finished';
-  } else {
-    messageEl.textContent = '';
-  }
-}
+// function applySnapshot(snap){
+//   if(!snap) return;
+//   // render dealer
+//   dealer.hand = snap.dealer ? (snap.dealer.hand || []) : [];
+//   // find our player by client id (fallback to name)
+//   let me = null;
+//   if (snap.clientId && snap.players) me = (snap.players || []).find(p => p.id === snap.clientId);
+//   if(!me) me = (snap.players || []).find(p => p.displayName === (BJ_PARAMS && BJ_PARAMS.name));
+//   if(me){ player.hand = me.hand.slice(); }
+//   // else if not found, keep local
+//   renderHands(snap.phase !== 'finished');
+//   dealerScoreEl.textContent = dealer.hand ? String(handValue(dealer.hand)) : '-';
+//   playerScoreEl.textContent = player.hand ? String(handValue(player.hand)) : '0';
+//   // show message
+//   if(snap.phase === 'finished'){
+//     messageEl.textContent = 'Round finished';
+//   } else {
+//     messageEl.textContent = '';
+//   }
+// }
 
-function renderPlayerList(players){
-  const el = document.getElementById('playerList');
-  if(!el) return;
-  if(!players || players.length === 0) { el.textContent = '(none yet)'; return; }
-  el.innerHTML = '';
-  players.forEach(p=>{
-    const d = document.createElement('div');
-    d.textContent = (p.displayName || 'Unknown') + (p.isHost ? ' (host)' : '') + (p.id === myClientId ? ' ← you' : '');
-    el.appendChild(d);
-  });
-}
+// function renderPlayerList(players){
+//   const el = document.getElementById('playerList');
+//   if(!el) return;
+//   if(!players || players.length === 0) { el.textContent = '(none yet)'; return; }
+//   el.innerHTML = '';
+//   players.forEach(p=>{
+//     const d = document.createElement('div');
+//     d.textContent = (p.displayName || 'Unknown') + (p.isHost ? ' (host)' : '') + (p.id === myClientId ? ' ← you' : '');
+//     el.appendChild(d);
+//   });
+// }
 
-if(isMultiplayer){
-  const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const wsUrl = wsProto + '://' + location.host + '/ws';
-  socket = new WebSocket(wsUrl);
-  socket.addEventListener('open', ()=>{
-    console.log('BJ socket open');
-    // join table on blackjack page
-    const room = BJ_PARAMS.room;
-    const name = BJ_PARAMS.name || ('Guest-' + Math.random().toString(36).slice(2,6));
-    socket.send(JSON.stringify({ type: 'JOIN_TABLE', tableId: room, displayName: name, host: BJ_PARAMS.host }));
-  const statusEl = document.getElementById('message'); if(statusEl) statusEl.textContent = 'WS open, joined ' + room;
-  });
+// if(isMultiplayer){
+//   const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+//   const wsUrl = wsProto + '://' + location.host + '/ws';
+//   socket = new WebSocket(wsUrl);
+//   socket.addEventListener('open', ()=>{
+//     console.log('BJ socket open');
+//     // join table on blackjack page
+//     const room = BJ_PARAMS.room;
+//     const name = BJ_PARAMS.name || ('Guest-' + Math.random().toString(36).slice(2,6));
+//     socket.send(JSON.stringify({ type: 'JOIN_TABLE', tableId: room, displayName: name, host: BJ_PARAMS.host }));
+//   const statusEl = document.getElementById('message'); if(statusEl) statusEl.textContent = 'WS open, joined ' + room;
+//   });
 
-  socket.addEventListener('message', (ev)=>{
-    let msg; try{ msg = JSON.parse(ev.data); }catch(e){return;}
-    console.log('BJ WS RX', msg);
-    // show raw message
-    if(!lastRawMsgEl) lastRawMsgEl = document.getElementById('playerList');
-    if(lastRawMsgEl) lastRawMsgEl.dataset.last = JSON.stringify(msg);
-    if(msg.type === 'WELCOME' && msg.clientId){
-      myClientId = msg.clientId;
-      console.log('assigned clientId', myClientId);
-    }
-    if(msg.type === 'TABLE_UPDATE'){
-      applySnapshot({ phase: msg.phase, dealer: msg.dealer, players: msg.players, clientId: myClientId });
-      renderPlayerList(msg.players || []);
-      const statusEl = document.getElementById('message'); if(statusEl) statusEl.textContent = 'Received TABLE_UPDATE: ' + (msg.players?msg.players.length:0) + ' players';
-    }
-  });
+//   socket.addEventListener('message', (ev)=>{
+//     let msg; try{ msg = JSON.parse(ev.data); }catch(e){return;}
+//     console.log('BJ WS RX', msg);
+//     // show raw message
+//     if(!lastRawMsgEl) lastRawMsgEl = document.getElementById('playerList');
+//     if(lastRawMsgEl) lastRawMsgEl.dataset.last = JSON.stringify(msg);
+//     if(msg.type === 'WELCOME' && msg.clientId){
+//       myClientId = msg.clientId;
+//       console.log('assigned clientId', myClientId);
+//     }
+//     if(msg.type === 'TABLE_UPDATE'){
+//       applySnapshot({ phase: msg.phase, dealer: msg.dealer, players: msg.players, clientId: myClientId });
+//       renderPlayerList(msg.players || []);
+//       const statusEl = document.getElementById('message'); if(statusEl) statusEl.textContent = 'Received TABLE_UPDATE: ' + (msg.players?msg.players.length:0) + ' players';
+//     }
+//   });
 
-  // actions send to server
-  if (dealBtn) dealBtn.addEventListener('click', ()=>{
-    socket.send(JSON.stringify({ type: 'PLAYER_ACTION', action: 'DEAL' }));
-  });
-  if (hitBtn) hitBtn.addEventListener('click', ()=>{
-    socket.send(JSON.stringify({ type: 'PLAYER_ACTION', action: 'HIT' }));
-  });
-  if (standBtn) standBtn.addEventListener('click', ()=>{
-    socket.send(JSON.stringify({ type: 'PLAYER_ACTION', action: 'STAND' }));
-  });
-} else {
+//   // actions send to server
+//   if (dealBtn) dealBtn.addEventListener('click', ()=>{
+//     socket.send(JSON.stringify({ type: 'PLAYER_ACTION', action: 'DEAL' }));
+//   });
+//   if (hitBtn) hitBtn.addEventListener('click', ()=>{
+//     socket.send(JSON.stringify({ type: 'PLAYER_ACTION', action: 'HIT' }));
+//   });
+//   if (standBtn) standBtn.addEventListener('click', ()=>{
+//     socket.send(JSON.stringify({ type: 'PLAYER_ACTION', action: 'STAND' }));
+//   });
+// } else {
   if (dealBtn) dealBtn.addEventListener('click', ()=>{
     resetTable();
     dealInitial();
@@ -338,9 +342,7 @@ if(isMultiplayer){
   if (standBtn) standBtn.addEventListener('click', ()=>{
     finishHand();
   });
-}
 
-if (newBtn) newBtn.addEventListener('click', ()=>{
-  resetTable();
-});
- 
+  if (newBtn) newBtn.addEventListener('click', ()=>{
+    resetTable();
+  });

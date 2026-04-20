@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard — Blackjack</title>
+    <style>
+      * { box-sizing: border-box; font-family: Inter, system-ui, sans-serif; }
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #1a1a2e; padding: 24px; }
+      .card { background: #16213e; border: 1px solid #0f3460; border-radius: 16px; padding: 36px 40px; width: 100%; max-width: 520px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+      h2 { margin: 0 0 8px 0; color: #e2e2e2; font-size: 24px; text-align: center; }
+      .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
+      .row { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; padding: 12px 8px; border-bottom: 1px solid #0f3460; gap: 12px; }
+      .row:last-child { border-bottom: none; }
+      .rank { font-weight: 700; color: #888; font-size: 15px; text-align: center; }
+      .rank.gold { color: #ffd700; font-size: 18px; }
+      .rank.silver { color: #c0c0c0; font-size: 17px; }
+      .rank.bronze { color: #cd7f32; font-size: 16px; }
+      .username { color: #e2e2e2; font-size: 15px; font-weight: 500; }
+      .username.me { color: #ffd700; }
+      .coins { color: #ffd700; font-weight: 700; font-size: 15px; white-space: nowrap; }
+      .header-row { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; padding: 0 8px 10px; border-bottom: 2px solid #0f3460; margin-bottom: 4px; color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+      .back { display: inline-block; margin-top: 20px; color: #888; font-size: 13px; text-decoration: none; text-align: center; width: 100%; }
+      .back:hover { color: #e2e2e2; }
+      #loading { text-align: center; color: #888; padding: 20px 0; }
+      #error { text-align: center; color: #ff6b6b; padding: 20px 0; display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>🏆 Leaderboard</h2>
+      <p class="subtitle">Top 10 spelers met de meeste coins</p>
+      <div class="header-row">
+        <span style="text-align:center">#</span>
+        <span>Speler</span>
+        <span>Coins</span>
+      </div>
+      <div id="loading">Laden…</div>
+      <div id="error">Kon leaderboard niet laden.</div>
+      <div id="list"></div>
+    </div>
+    <a href="/" class="back">← Terug naar lobby</a>
+
+    <script>
+      async function loadLeaderboard() {
+        const token = localStorage.getItem('token');
+        let myUsername = null;
+
+        if (token) {
+          try {
+            const me = await fetch('/api/me', { headers: { Authorization: 'Bearer ' + token } });
+            if (me.ok) myUsername = (await me.json()).username;
+          } catch {}
+        }
+
+        try {
+          const res = await fetch('/api/leaderboard.json');
+          if (!res.ok) throw new Error();
+          const { top } = await res.json();
+
+          document.getElementById('loading').style.display = 'none';
+          const list = document.getElementById('list');
+
+          const rankLabels = { 1: '🥇', 2: '🥈', 3: '🥉' };
+          const rankClasses = { 1: 'gold', 2: 'silver', 3: 'bronze' };
+
+          top.forEach(p => {
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const rankEl = document.createElement('span');
+            rankEl.className = 'rank' + (rankClasses[p.rank] ? ' ' + rankClasses[p.rank] : '');
+            rankEl.textContent = rankLabels[p.rank] ?? p.rank;
+
+            const nameEl = document.createElement('span');
+            nameEl.className = 'username' + (p.username === myUsername ? ' me' : '');
+            nameEl.textContent = p.username + (p.username === myUsername ? ' (jij)' : '');
+
+            const coinsEl = document.createElement('span');
+            coinsEl.className = 'coins';
+            coinsEl.textContent = p.coins_amount.toLocaleString('nl-NL') + ' 🪙';
+
+            row.appendChild(rankEl);
+            row.appendChild(nameEl);
+            row.appendChild(coinsEl);
+            list.appendChild(row);
+          });
+
+          if (top.length === 0) {
+            list.textContent = 'Nog geen spelers.';
+            list.style.cssText = 'text-align:center;color:#888;padding:20px 0;';
+          }
+        } catch {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('error').style.display = 'block';
+        }
+      }
+
+      loadLeaderboard();
+    </script>
+  </body>
+</html>

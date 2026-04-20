@@ -1,38 +1,95 @@
----
-// Simple shop page for buying coin packages. Backend payment integration (Mollie)
-// will be wired later; this page calls a stub API that returns a payment URL.
----
 <!doctype html>
-<html lang="en">
+<html lang="nl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shop — Buy Coins</title>
-    <link rel="stylesheet" href="/poker.css" />
+    <title>Shop — Blackjack</title>
     <style>
-      .shop { max-width:900px; margin:36px auto; padding:20px; }
-      .packages { display:flex; flex-wrap:wrap; gap:16px; }
-      .pkg { background:linear-gradient(180deg,#fff,#f7f7f8); border:1px solid #e6e6e8; padding:18px; border-radius:12px; width:220px; box-shadow:0 6px 18px rgba(20,20,30,0.06); }
-      .pkg h3{ margin:0 0 8px 0; font-size:18px }
-      .pkg .coins{ font-weight:700; color:#2b2b2b; font-size:20px }
-      .pkg .price{ margin-top:8px; font-size:16px; color:#444 }
-      .pkg button{ margin-top:12px; display:block; width:100%; padding:10px 12px; border-radius:8px; background:#0b6cff; color:#fff; border:0; cursor:pointer }
-      .pkg button[disabled]{ background:#99b8ff; cursor:default }
-      .note{ margin-top:18px; color:#666 }
+      * { box-sizing:border-box; font-family:Inter, system-ui, sans-serif; }
+      body { margin:0; background:#0b0b0b; background-image:url('/bg.png'); background-size:cover; background-position:center; background-attachment:fixed; color:#e2e2e2; min-height:100vh; }
+      header { display:flex; align-items:center; justify-content:space-between; padding:16px 32px; border-bottom:1px solid #0f3460; background:rgba(11,11,11,0.55); backdrop-filter:blur(6px); }
+      header h1 { margin:0; font-size:20px; color:#ffd700; }
+      header a { color:#e94560; text-decoration:none; font-size:14px; }
+      .shop { background:rgba(13,27,42,0.6); backdrop-filter:blur(4px); border:1px solid #0f3460; border-radius:16px; max-width:700px; margin:40px auto; padding:32px 20px; }
+      .shop { max-width:700px; margin:40px auto; padding:0 20px; }
+      .shop h2 { margin:0 0 8px 0; font-size:28px; }
+      .shop p { color:#888; margin:0 0 32px 0; }
+      .packages { display:flex; flex-wrap:wrap; gap:20px; }
+      .pkg { background:#16213e; border:1px solid #0f3460; border-radius:14px; padding:24px; width:180px; }
+      .pkg .coins { font-size:22px; font-weight:700; color:#ffd700; margin-bottom:6px; }
+      .pkg .price { color:#aaa; font-size:15px; margin-bottom:16px; }
+      .pkg button { width:100%; padding:10px; border-radius:8px; background:#e94560; color:#fff; border:0; font-size:14px; font-weight:600; cursor:pointer; }
+      .pkg button:disabled { background:#555; cursor:default; }
+      #msg { margin-top:20px; font-size:14px; min-height:20px; }
+      .ok { color:#6bff91; } .err { color:#ff6b6b; }
+      .success-banner { background:#1a3a1a; border:1px solid #2d8b5b; color:#6bff91; padding:14px 20px; border-radius:10px; margin-bottom:24px; }
     </style>
   </head>
   <body>
-    <main class="shop">
+    <header>
       <h1>Coin Shop</h1>
-      <p>Buy coins to play — payment will be handled by Mollie (integration pending). This page uses a stubbed API now so you can test the flow.</p>
+      <a href="/">← Terug naar lobby</a>
+    </header>
+    <div class="shop">
+      <h2>Koop coins</h2>
+      <p>Betaal veilig via iDEAL. Coins worden direct bijgeschreven na betaling.</p>
 
-      <section class="packages" id="packages">
-        <!-- packages injected by client script -->
-      </section>
+      <div id="success-banner" style="display:none" class="success-banner">
+        Betaling ontvangen! Je coins zijn bijgeschreven.
+      </div>
 
-      <p class="note">Note: After purchase is implemented the server will credit your account when the payment is confirmed.</p>
-    </main>
+      <div class="packages">
+        <div class="pkg">
+          <div class="coins">1.000</div>
+          <div class="price">€ 1,00</div>
+          <button data-pkg="p1">Kopen</button>
+        </div>
+        <div class="pkg">
+          <div class="coins">5.000</div>
+          <div class="price">€ 5,00</div>
+          <button data-pkg="p5">Kopen</button>
+        </div>
+        <div class="pkg">
+          <div class="coins">10.000</div>
+          <div class="price">€ 10,00</div>
+          <button data-pkg="p10">Kopen</button>
+        </div>
+      </div>
+      <p id="msg"></p>
+    </div>
 
-    <script type="module" src="/shop.js"></script>
+    <script>
+      // Show success banner if redirected from Mollie
+      if (new URLSearchParams(location.search).get('payment') === 'success') {
+        document.getElementById('success-banner').style.display = 'block';
+      }
+
+      document.querySelectorAll('[data-pkg]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const token = localStorage.getItem('token');
+          const msg = document.getElementById('msg');
+          if (!token) { location.href = '/login'; return; }
+          btn.disabled = true; btn.textContent = 'Bezig...';
+          msg.textContent = ''; msg.className = '';
+          try {
+            const res = await fetch('/api/create-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+              body: JSON.stringify({ packageId: btn.dataset.pkg })
+            });
+            const data = await res.json();
+            if (res.ok && data.paymentUrl) {
+              location.href = data.paymentUrl;
+            } else {
+              msg.className = 'err'; msg.textContent = data.error || 'Betaling mislukt';
+              btn.disabled = false; btn.textContent = 'Kopen';
+            }
+          } catch {
+            msg.className = 'err'; msg.textContent = 'Netwerkfout';
+            btn.disabled = false; btn.textContent = 'Kopen';
+          }
+        });
+      });
+    </script>
   </body>
 </html>

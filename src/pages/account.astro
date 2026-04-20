@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account — Blackjack</title>
+    <style>
+      * { box-sizing:border-box; font-family:Inter, system-ui, sans-serif; }
+      body { display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#1a1a2e; }
+      .card { background:#16213e; border:1px solid #0f3460; border-radius:16px; padding:36px 40px; width:100%; max-width:420px; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+      h2 { margin:0 0 24px 0; color:#e2e2e2; font-size:24px; text-align:center; }
+      .row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #0f3460; color:#ccc; font-size:15px; }
+      .coins { font-size:22px; font-weight:700; color:#ffd700; }
+      .actions { margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; }
+      .btn { flex:1; min-width:100px; padding:11px; border-radius:8px; border:0; font-size:14px; font-weight:600; cursor:pointer; text-align:center; text-decoration:none; display:inline-block; }
+      .btn-primary { background:#e94560; color:#fff; }
+      .btn-secondary { background:#0f3460; color:#e2e2e2; }
+      .btn-reward { background:#2d8b5b; color:#fff; width:100%; margin-top:10px; }
+      .btn-logout { background:transparent; border:1px solid #e94560; color:#e94560; width:100%; margin-top:6px; }
+      #reward-msg { margin-top:10px; text-align:center; font-size:13px; min-height:18px; }
+      .ok { color:#6bff91; } .err { color:#ff6b6b; }
+      #not-logged { display:none; text-align:center; color:#aaa; }
+      #not-logged a { color:#e94560; text-decoration:none; }
+      #account-card { display:none; }
+    </style>
+  </head>
+  <body>
+    <div class="card" id="account-card">
+      <h2>Mijn Account</h2>
+      <div class="row"><span>Gebruikersnaam</span><strong id="user-name">–</strong></div>
+      <div class="row"><span>Coins</span><span class="coins" id="user-coins">–</span></div>
+      <div class="row"><span>Lid sinds</span><strong id="user-created">–</strong></div>
+      <div class="actions">
+        <a href="/shop" class="btn btn-primary">Coins kopen</a>
+        <a href="/" class="btn btn-secondary">Spelen</a>
+      </div>
+      <button class="btn btn-reward" id="reward-btn">🎁 Dagelijkse beloning (+1000 coins)</button>
+      <p id="reward-msg"></p>
+      <button class="btn btn-logout" id="logout-btn">Uitloggen</button>
+    </div>
+    <div id="not-logged">
+      <p>Niet ingelogd. <a href="/login">Inloggen</a> of <a href="/signup">registreren</a>.</p>
+    </div>
+    <script>
+      async function loadAccount() {
+        const token = localStorage.getItem('token');
+        if (!token) { document.getElementById('not-logged').style.display = 'block'; return; }
+        const res = await fetch('/api/me', { headers: { Authorization: 'Bearer ' + token }, credentials: 'include' });
+        if (!res.ok) { localStorage.removeItem('token'); document.getElementById('not-logged').style.display = 'block'; return; }
+        const me = await res.json();
+        document.getElementById('user-name').textContent = me.username;
+        document.getElementById('user-coins').textContent = (me.coins_amount ?? 0).toLocaleString('nl-NL') + ' 🪙';
+        document.getElementById('user-created').textContent = me.createdAt ? new Date(me.createdAt).toLocaleDateString('nl-NL') : '–';
+        document.getElementById('account-card').style.display = 'block';
+      }
+
+      document.getElementById('reward-btn').addEventListener('click', async () => {
+        const token = localStorage.getItem('token');
+        const msg = document.getElementById('reward-msg');
+        try {
+          const res = await fetch('/api/daily-reward', { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
+          const data = await res.json();
+          if (data.claimed) {
+            msg.className = 'ok'; msg.textContent = data.message;
+            loadAccount();
+          } else {
+            const next = data.nextClaimAt ? ' Morgen weer: ' + new Date(data.nextClaimAt).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' }) : '';
+            msg.className = 'err'; msg.textContent = data.message + next;
+          }
+        } catch {
+          msg.className = 'err'; msg.textContent = 'Fout bij claimen';
+        }
+      });
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        document.cookie = 'session=; Path=/; Max-Age=0';
+        location.href = '/login';
+      });
+
+      loadAccount();
+
+      window.addEventListener('pageshow', (e) => {
+        if (e.persisted) loadAccount();
+      });
+    </script>
+  </body>
+</html>

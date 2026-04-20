@@ -1,0 +1,33 @@
+---
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Uitloggen — Blackjack</title>
+    <style>
+      * { box-sizing:border-box; font-family:Inter, system-ui, sans-serif; }
+      body { display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#0b0b0b; background-image:url('/bg.png'); background-size:cover; background-position:center; }
+      .card { background:#16213e; border:1px solid #0f3460; border-radius:16px; padding:36px 40px; width:100%; max-width:380px; box-shadow:0 8px 32px rgba(0,0,0,0.4); text-align:center; }
+      h2 { margin:0 0 12px 0; color:#e2e2e2; font-size:24px; }
+      p { color:#aaa; font-size:14px; margin:0 0 24px 0; }
+      .btn { display:inline-block; padding:12px 28px; border-radius:8px; background:#e94560; color:#fff; border:0; font-size:15px; font-weight:600; cursor:pointer; text-decoration:none; }
+      .btn-ghost { background:transparent; border:1px solid #0f3460; color:#aaa; margin-left:10px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Uitloggen</h2>
+      <p>Weet je zeker dat je wilt uitloggen?</p>
+      <button class="btn" id="confirmBtn">Uitloggen</button>
+      <a href="/" class="btn btn-ghost">Annuleren</a>
+    </div>
+    <script>
+      document.getElementById('confirmBtn').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        location.href = '/login';
+      });
+    </script>
+  </body>
+</html>

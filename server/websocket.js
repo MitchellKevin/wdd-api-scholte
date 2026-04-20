@@ -1,119 +1,142 @@
 import { WebSocketServer } from 'ws';
-import gameManager from './gameManager.js';
-import pokerManager from './pokerManager.js';
-
-// WebSocket server for multiplayer blackjack
-// - clients: Map clientId -> { socket, tableId, displayName, isHost }
-// - tables: Map tableId -> Set(clientId)
+import { verifyTokenRaw } from '../lib/auth.js';
+import * as gm from './gameManager.js';
+import { creditCoins, deductCoins } from './db.js';
 
 const clients = new Map();
-const tables = new Map();
 
-function genId(){ return Math.random().toString(36).slice(2,9); }
+function genId() {
+  return Math.random().toString(36).slice(2, 10);
+}
 
-export function attachWebSocket(httpServer){
+export function attachWebSocket(httpServer) {
   const wss = new WebSocketServer({ server: httpServer });
 
-  wss.on('connection', (socket, req) => {
-    const id = genId();
-    clients.set(id, { socket, tableId: null, displayName: null, isHost: false });
-    console.log('[WS] connection', id, req && req.socket && req.socket.remoteAddress);
+  wss.on('connection', (socket) => {
+    const clientId = genId();
+    clients.set(clientId, { socket, roomId: null, userId: null, username: null });
+    safeSend(socket, { type: 'WELCOME', clientId });
 
-    // send assigned client id
-    safeSend(socket, { type: 'WELCOME', clientId: id });
-
-    socket.on('message', raw => {
+    socket.on('message', async (raw) => {
       let msg;
-      try { msg = JSON.parse(String(raw)); } catch (e) { console.warn('[WS] bad json from', id); return; }
-      console.log('[WS] rx', id, msg && msg.type);
-      handleMessage(id, msg);
+      try { msg = JSON.parse(String(raw)); } catch { return; }
+      await handleMessage(clientId, msg);
     });
 
-    socket.on('close', () => {
-      const c = clients.get(id);
-      if (c && c.tableId) removeClientFromTable(id, c.tableId);
-      clients.delete(id);
-      console.log('[WS] close', id);
+    socket.on('close', async () => {
+      const c = clients.get(clientId);
+      if (c?.roomId) {
+        gm.removePlayer(c.roomId, clientId);
+        broadcastRoom(c.roomId);
+      }
+      clients.delete(clientId);
     });
   });
 
-  function handleMessage(clientId, msg){
-    if (!msg || !msg.type) return;
-    switch (msg.type){
-      case 'JOIN_TABLE': return handleJoinTable(clientId, msg);
-      case 'PLAYER_ACTION': return handlePlayerAction(clientId, msg);
-      case 'PING': return send(clientId, { type: 'PONG' });
-      default: console.warn('[WS] unknown', msg.type, 'from', clientId);
-    }
-  }
-
-  function handleJoinTable(clientId, msg){
-    const tableId = String(msg.tableId || '').trim();
-    if (!tableId){ send(clientId, { type: 'ERROR', message: 'Invalid table id' }); return; }
-
+  async function handleMessage(clientId, msg) {
+    if (!msg?.type) return;
     const client = clients.get(clientId);
     if (!client) return;
 
-    if (client.tableId) removeClientFromTable(clientId, client.tableId);
+    switch (msg.type) {
+      case 'JOIN_ROOM': {
+        const payload = verifyTokenRaw(msg.token);
+        if (!payload) { sendErr(clientId, 'Niet ingelogd'); return; }
+        const roomId = String(msg.roomId || '').trim();
+        if (!roomId || !/^\d+$/.test(roomId)) { sendErr(clientId, 'Ongeldig kamer-nummer (alleen cijfers)'); return; }
+        if (client.roomId) { gm.removePlayer(client.roomId, clientId); broadcastRoom(client.roomId); }
+        client.roomId = roomId;
+        client.userId = payload.sub;
+        client.username = payload.username;
+        const result = gm.addPlayer(roomId, clientId, payload.sub, payload.username);
+        if (result.error) { client.roomId = null; sendErr(clientId, result.error); return; }
+        broadcastRoom(roomId);
+        break;
+      }
 
-    client.tableId = tableId;
-    client.displayName = msg.displayName || ('Guest-' + genId().slice(0,4));
-    client.isHost = !!msg.host;
+      case 'START_GAME': {
+        if (!client.roomId) return;
+        const result = gm.startGame(client.roomId, clientId);
+        if (result.error) { sendErr(clientId, result.error); return; }
+        broadcastRoom(client.roomId);
+        break;
+      }
 
-    if (!tables.has(tableId)) tables.set(tableId, new Set());
-    const set = tables.get(tableId);
-    if (set.size === 0 && !msg.host) client.isHost = true;
-    set.add(clientId);
+      case 'PLACE_BET': {
+        if (!client.roomId) return;
+        const amount = parseInt(msg.amount, 10);
+        if (!amount || amount < 1) { sendErr(clientId, 'Ongeldige inzet'); return; }
+        const deducted = await deductCoins(client.userId, amount);
+        if (!deducted) { sendErr(clientId, 'Niet genoeg coins'); return; }
+        const result = gm.placeBet(client.roomId, clientId, amount);
+        if (result.error) {
+          await creditCoins(client.userId, amount);
+          sendErr(clientId, result.error); return;
+        }
+        const room = gm.getRoom(client.roomId);
+        if (room?.phase === 'results') await creditIfNeeded(room);
+        broadcastRoom(client.roomId);
+        break;
+      }
 
-  // register with appropriate manager (poker if requested)
-  const manager = (msg && msg.game === 'poker') ? pokerManager : gameManager;
-  manager.addPlayer(tableId, { id: clientId, displayName: client.displayName, isHost: client.isHost });
+      case 'HIT': {
+        if (!client.roomId) return;
+        const result = gm.hit(client.roomId, clientId);
+        if (result.error) { sendErr(clientId, result.error); return; }
+        const room = gm.getRoom(client.roomId);
+        if (room?.phase === 'results') await creditIfNeeded(room);
+        broadcastRoom(client.roomId);
+        break;
+      }
 
-  const snap = manager.snapshot(tableId) || { players: [], dealer: null, community: [], phase: 'waiting' };
-    broadcastTableState(tableId, snap);
+      case 'STAND': {
+        if (!client.roomId) return;
+        const result = gm.stand(client.roomId, clientId);
+        if (result.error) { sendErr(clientId, result.error); return; }
+        const room = gm.getRoom(client.roomId);
+        if (room?.phase === 'results') await creditIfNeeded(room);
+        broadcastRoom(client.roomId);
+        break;
+      }
+
+      case 'PLAY_AGAIN': {
+        if (!client.roomId) return;
+        const result = gm.startGame(client.roomId, clientId);
+        if (result.error) { sendErr(clientId, result.error); return; }
+        broadcastRoom(client.roomId);
+        break;
+      }
+
+      case 'PING':
+        safeSend(client.socket, { type: 'PONG' });
+        break;
+    }
   }
 
-  function removeClientFromTable(clientId, tableId){
-    const set = tables.get(tableId);
-    if (!set) return;
-    set.delete(clientId);
-    if (set.size === 0) tables.delete(tableId);
-
-  // default remove from both managers to be safe
-  try{ gameManager.removePlayer(tableId, clientId); }catch(e){}
-  try{ pokerManager.removePlayer(tableId, clientId); }catch(e){}
-  const snap = (pokerManager.snapshot(tableId) || gameManager.snapshot(tableId)) || { players: [], dealer: null, community: [], phase: 'waiting' };
-    broadcastTableState(tableId, snap);
+  async function creditIfNeeded(room) {
+    if (room.winsCredited) return;
+    gm.markWinsCredited(room.id);
+    for (const p of room.players) {
+      if (p.winAmount > 0) await creditCoins(p.userId, p.winAmount);
+    }
   }
 
-  function handlePlayerAction(clientId, msg){
-    const client = clients.get(clientId);
-    if (!client || !client.tableId) return;
-    const tableId = client.tableId;
-    console.log('[WS] action', clientId, msg.action, 'table', tableId);
-  const manager = (msg && msg.game === 'poker') ? pokerManager : gameManager;
-  const snap = manager.handleAction(tableId, clientId, msg);
-    broadcastTableState(tableId, snap);
+  function broadcastRoom(roomId) {
+    const snap = gm.snapshot(roomId);
+    if (!snap) return;
+    for (const [, c] of clients) {
+      if (c.roomId === roomId) {
+        safeSend(c.socket, { type: 'ROOM_UPDATE', ...snap, myUsername: c.username });
+      }
+    }
   }
 
-  function send(clientId, message){
-    const client = clients.get(clientId);
-    if (!client || !client.socket) return;
-    try { client.socket.send(JSON.stringify(message)); } catch (e) { /* ignore */ }
+  function sendErr(clientId, message) {
+    const c = clients.get(clientId);
+    if (c) safeSend(c.socket, { type: 'ERROR', message });
   }
 
-  function safeSend(socket, msg){ try { socket.send(JSON.stringify(msg)); } catch (e) { /* ignore */ } }
-
-  function broadcastTableState(tableId, state){
-    const set = tables.get(tableId);
-    if (!set) return;
-    const players = state && state.players ? state.players : [];
-    const dealer = state && state.dealer ? state.dealer : null;
-    const phase = state && state.phase ? state.phase : 'waiting';
-
-    console.log('[WS] broadcast table', tableId, players.map(p => p.displayName + '(' + p.id + ')'));
-
-    const payload = { type: 'TABLE_UPDATE', tableId, players, dealer, phase };
-    set.forEach(cid => { send(cid, payload); });
+  function safeSend(socket, msg) {
+    try { socket.send(JSON.stringify(msg)); } catch {}
   }
 }

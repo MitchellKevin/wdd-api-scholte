@@ -1,33 +1,67 @@
-<html>
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inloggen — Blackjack</title>
+    <style>
+      * { box-sizing:border-box; font-family:Inter, system-ui, sans-serif; }
+      body { display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#0b0b0b; background-image:url('/bg.png'); background-size:cover; background-position:center; }
+      .card { background:#16213e; border:1px solid #0f3460; border-radius:16px; padding:36px 40px; width:100%; max-width:380px; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+      h2 { margin:0 0 24px 0; color:#e2e2e2; font-size:24px; text-align:center; }
+      label { display:block; color:#aaa; font-size:13px; margin-bottom:4px; }
+      input { width:100%; padding:10px 14px; border-radius:8px; border:1px solid #0f3460; background:#0d1b2a; color:#e2e2e2; font-size:15px; margin-bottom:16px; }
+      input:focus { outline:none; border-color:#e94560; }
+      button { width:100%; padding:12px; border-radius:8px; background:#e94560; color:#fff; border:0; font-size:16px; cursor:pointer; font-weight:600; }
+      button:disabled { opacity:.6; cursor:default; }
+      #msg { margin-top:14px; text-align:center; font-size:14px; min-height:20px; }
+      .err { color:#ff6b6b; } .ok { color:#6bff91; }
+      .footer { text-align:center; margin-top:20px; color:#888; font-size:13px; }
+      .footer a { color:#e94560; text-decoration:none; }
+    </style>
+  </head>
   <body>
-    <h2>Login</h2>
-
-    <input id="email" placeholder="Email" />
-    <input id="password" type="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-
-    <p id="msg"></p>
-
+    <div class="card">
+      <h2>Inloggen</h2>
+      <label for="username">Gebruikersnaam</label>
+      <input id="username" type="text" placeholder="jouw_naam" autocomplete="username" />
+      <label for="password">Wachtwoord</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      <button id="btn">Inloggen</button>
+      <p id="msg"></p>
+      <div class="footer">Nog geen account? <a href="/signup">Registreren</a></div>
+    </div>
     <script>
+      const btn = document.getElementById('btn');
+      const msg = document.getElementById('msg');
       async function login() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        const res = await fetch("/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await res.json();
-
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          document.getElementById("msg").innerText = "Logged in!";
-        } else {
-          document.getElementById("msg").innerText = data.message;
+        btn.disabled = true; btn.textContent = 'Bezig...';
+        msg.textContent = ''; msg.className = '';
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        try {
+          const res = await fetch('/api/login', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await res.json();
+          if (res.ok && data.token) {
+            localStorage.setItem('token', data.token);
+            if (data.dailyReward) sessionStorage.setItem('dailyReward', '🎁 Dagelijkse beloning: +1000 coins!');
+            msg.className = 'ok'; msg.textContent = 'Ingelogd! Je wordt doorgestuurd...';
+            setTimeout(() => { location.href = '/'; }, 600);
+          } else {
+            msg.className = 'err'; msg.textContent = data.message || 'Inloggen mislukt';
+          }
+        } catch {
+          msg.className = 'err'; msg.textContent = 'Netwerkfout, probeer opnieuw';
+        } finally {
+          btn.disabled = false; btn.textContent = 'Inloggen';
         }
       }
+      btn.addEventListener('click', login);
+      document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
     </script>
   </body>
 </html>

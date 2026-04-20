@@ -94,3 +94,11 @@ TODO:
 * Leaderboard
 * Websockets API Multiplayer
 * (Optional) Poker
+
+Feedback
+* Geluid toevoegen, content api
+* Layout netter maken letten op focus op ruimte
+* Multiplayer toevoegen wel belangrijk nog om voor de webAPI en localStorage niet vergeten
+* Focus eerst op het mooi maken daarna op de extra features zoals de database en payment system.
+* Poker laten zitten
+* Niet te ingewikkeld maken
