@@ -1,135 +1,302 @@
 ---
 ---
 
-<html>
+<!doctype html>
+<html lang="nl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Table</title>
+    <title>Tafel — Blackjack</title>
     <style>
-      body { font-family: system-ui, sans-serif; padding: 20px; }
-      #status { margin-bottom: 10px; }
-      #players { margin-top: 10px; }
-      .player { padding: 6px 8px; border: 1px solid #ddd; margin: 4px 0; border-radius: 6px; }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background-image: url('/bg.png');
+        background-size: cover;
+        background-position: center;
+        color: rgba(255,255,255,0.85);
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(10,14,30,0.8);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 36px 32px;
+        box-shadow: 0 0 0 1px rgba(255,215,0,0.04), 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+        animation: fadeUp 0.4s ease both;
+      }
+      .card-header { text-align: center; margin-bottom: 28px; }
+      .card-icon { font-size: 36px; display: block; margin-bottom: 10px; }
+      h2 {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #fff 0%, #ffd700 60%, #ffaa00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 6px;
+      }
+      .room-id {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,215,0,0.08);
+        border: 1px solid rgba(255,215,0,0.2);
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-size: 13px;
+        color: #ffd700;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: rgba(255,255,255,0.5);
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        flex-shrink: 0;
+      }
+      .status-dot.connected { background: #6bff91; box-shadow: 0 0 6px rgba(107,255,145,0.5); }
+      .status-dot.error { background: #ff6b6b; }
+      .section-label {
+        color: rgba(255,255,255,0.3);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 8px;
+      }
+      #list { margin-bottom: 20px; min-height: 20px; }
+      .player {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px;
+        margin-bottom: 6px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .player-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a2a4a, #0f3460);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: rgba(255,255,255,0.6);
+        flex-shrink: 0;
+      }
+      .host-badge {
+        margin-left: auto;
+        font-size: 10px;
+        font-weight: 700;
+        background: rgba(255,215,0,0.12);
+        border: 1px solid rgba(255,215,0,0.25);
+        color: #ffd700;
+        border-radius: 6px;
+        padding: 2px 7px;
+        letter-spacing: 0.05em;
+      }
+      #joinArea { }
+      label {
+        display: block;
+        color: rgba(255,255,255,0.4);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 6px;
+      }
+      input {
+        width: 100%;
+        padding: 11px 14px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        color: rgba(255,255,255,0.85);
+        font-size: 15px;
+        font-family: inherit;
+        margin-bottom: 12px;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      input:focus { outline: none; border-color: rgba(233,69,96,0.6); box-shadow: 0 0 0 3px rgba(233,69,96,0.12); }
+      input::placeholder { color: rgba(255,255,255,0.2); }
+      button {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #e94560, #c4314f);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(233,69,96,0.3);
+        transition: opacity 0.15s, transform 0.1s;
+      }
+      button:hover { opacity: 0.9; transform: translateY(-1px); }
+      button:active { transform: translateY(0); }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
     </style>
   </head>
   <body>
-    <h2>Game Table</h2>
-    <div id="status">Connecting...</div>
-    <div>Room: <span id="roomId"></span></div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🎰</span>
+        <h2>Game Table</h2>
+        <div class="room-id">Kamer <span id="roomId">–</span></div>
+      </div>
 
-    <div id="players">
-      <h3>Players</h3>
+      <div class="status-bar">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="status">Verbinden...</span>
+      </div>
+
+      <p class="section-label">Spelers</p>
       <div id="list"></div>
-    </div>
 
-    <div id="joinArea" style="margin-top:12px">
-      <label>Naam: <input id="playerName" type="text" placeholder="Your name"></label>
-      <button id="joinTableBtn">Join Table</button>
+      <div id="joinArea">
+        <label for="playerName">Naam</label>
+        <input id="playerName" type="text" placeholder="Jouw naam" />
+        <button id="joinTableBtn">Tafel betreden</button>
+      </div>
     </div>
 
     <script>
-      // read room from query string
       const params = new URLSearchParams(location.search);
       const room = params.get('room');
-      const roomSpan = document.getElementById('roomId');
-      if (roomSpan) roomSpan.textContent = room || '(none)';
+      const roomSpan = document.getElementById('roomId') as HTMLElement;
+      if (roomSpan) roomSpan.textContent = room || '(geen)';
 
       const isHost = params.get('host') === '1';
 
       if (!room) {
-        const statusEl = document.getElementById('status');
-        if (statusEl) statusEl.textContent = 'No room specified. Go back and enter a room id.';
+        const statusEl = document.getElementById('status') as HTMLElement;
+        if (statusEl) statusEl.textContent = 'Geen kamer opgegeven.';
         throw new Error('No room');
       }
 
       const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsUrl = wsProto + '://' + location.host + '/ws';
-      const socket = new WebSocket(wsUrl);
+      const socket = new WebSocket(wsProto + '://' + location.host + '/ws');
+
+      const statusEl = document.getElementById('status') as HTMLElement;
+      const statusDot = document.getElementById('statusDot') as HTMLElement;
 
       socket.addEventListener('open', () => {
-        const statusEl = document.getElementById('status');
-        if (statusEl) statusEl.textContent = 'Connected';
-        // wait for user to click Join (so they can provide a name)
+        if (statusEl) statusEl.textContent = 'Verbonden';
+        if (statusDot) statusDot.classList.add('connected');
       });
 
-      // join UI
       const joinArea = document.getElementById('joinArea');
-  const nameInput = document.getElementById('playerName');
-  const nameInputEl = (nameInput && nameInput instanceof HTMLInputElement) ? nameInput : null;
+      const nameInput = document.getElementById('playerName');
+      const nameInputEl = (nameInput && nameInput instanceof HTMLInputElement) ? nameInput : null;
       const joinBtn = document.getElementById('joinTableBtn');
       if (nameInputEl && isHost) {
-        nameInputEl.value = 'Host-' + Math.random().toString(36).slice(2,5);
+        nameInputEl.value = 'Host-' + Math.random().toString(36).slice(2, 5);
       }
 
-      function doJoin(){
-        let name = 'Guest-' + Math.random().toString(36).slice(2,6);
+      function doJoin() {
+        let name = 'Guest-' + Math.random().toString(36).slice(2, 6);
         if (nameInputEl && typeof nameInputEl.value === 'string' && nameInputEl.value.trim().length) name = nameInputEl.value.trim();
         const payload = JSON.stringify({ type: 'JOIN_TABLE', tableId: room, displayName: name, host: isHost });
-
-        // try to send join message if socket is open, otherwise send when open,
-        // but do not block navigation: always navigate immediately so the user can play.
         try {
           if (socket && socket.readyState === 1) {
             socket.send(payload);
-            console.log('JOIN_TABLE sent', payload);
           } else if (socket) {
-            socket.addEventListener('open', () => { try{ socket.send(payload); console.log('JOIN_TABLE sent after open'); }catch(e){} }, { once: true });
+            socket.addEventListener('open', () => { try { socket.send(payload); } catch (e) {} }, { once: true });
           }
         } catch (e) { console.warn('Could not send JOIN_TABLE before redirect', e); }
-
         if (joinArea) joinArea.style.display = 'none';
         const rid = room || '';
-        const url = '/blackjack?room=' + encodeURIComponent(rid) + '&name=' + encodeURIComponent(name) + (isHost? '&host=1' : '');
-        location.href = url;
+        location.href = '/blackjack?room=' + encodeURIComponent(rid) + '&name=' + encodeURIComponent(name) + (isHost ? '&host=1' : '');
       }
 
       if (joinBtn) joinBtn.addEventListener('click', doJoin);
-
-      // optionally allow Enter to join
-      if (nameInput) nameInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') doJoin(); });
+      if (nameInput) nameInput.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') doJoin(); });
 
       socket.addEventListener('message', (ev) => {
-        let msg;
+        let msg: { type: string; players?: { displayName?: string; isHost?: boolean }[]; message?: string };
         try { msg = JSON.parse(ev.data); } catch { return; }
-
-        if (msg.type === 'WELCOME') {
-          // ignore
-          return;
-        }
+        if (msg.type === 'WELCOME') return;
 
         if (msg.type === 'TABLE_UPDATE') {
           const list = document.getElementById('list');
           if (list) {
             list.innerHTML = '';
             const players = msg.players || [];
-            // ensure hosts are shown first: build host array then others
-            const hosts = [];
-            const others = [];
-            for (let i = 0; i < players.length; i++) {
-              const p = players[i];
-              if (p && p.isHost) hosts.push(p); else others.push(p);
-            }
+            const hosts = players.filter(p => p && p.isHost);
+            const others = players.filter(p => p && !p.isHost);
             const ordered = hosts.concat(others);
-            for (let i = 0; i < ordered.length; i++) {
-              const p = ordered[i];
+            ordered.forEach(p => {
               const d = document.createElement('div');
               d.className = 'player';
-              d.textContent = (p && p.displayName ? p.displayName : 'Unknown') + (p && p.isHost ? ' (host)' : '');
+              const avatar = document.createElement('div');
+              avatar.className = 'player-avatar';
+              const name = p.displayName || 'Unknown';
+              avatar.textContent = name.slice(0, 2).toUpperCase();
+              const nameEl = document.createElement('span');
+              nameEl.textContent = name;
+              d.appendChild(avatar);
+              d.appendChild(nameEl);
+              if (p.isHost) {
+                const badge = document.createElement('span');
+                badge.className = 'host-badge';
+                badge.textContent = 'HOST';
+                d.appendChild(badge);
+              }
               list.appendChild(d);
-            }
+            });
           }
         }
 
         if (msg.type === 'ERROR') {
-          const statusEl = document.getElementById('status');
-          if (statusEl) statusEl.textContent = 'Error: ' + msg.message;
+          if (statusEl) statusEl.textContent = 'Fout: ' + msg.message;
+          if (statusDot) { statusDot.classList.remove('connected'); statusDot.classList.add('error'); }
         }
       });
 
       socket.addEventListener('close', () => {
-        const statusEl = document.getElementById('status');
-        if (statusEl) statusEl.textContent = 'Disconnected';
+        if (statusEl) statusEl.textContent = 'Verbroken';
+        if (statusDot) { statusDot.classList.remove('connected'); statusDot.classList.add('error'); }
       });
     </script>
   </body>

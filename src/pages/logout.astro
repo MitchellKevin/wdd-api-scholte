@@ -7,24 +7,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Uitloggen — Blackjack</title>
     <style>
-      * { box-sizing:border-box; font-family:Inter, system-ui, sans-serif; }
-      body { display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#0b0b0b; background-image:url('/bg.png'); background-size:cover; background-position:center; }
-      .card { background:#16213e; border:1px solid #0f3460; border-radius:16px; padding:36px 40px; width:100%; max-width:380px; box-shadow:0 8px 32px rgba(0,0,0,0.4); text-align:center; }
-      h2 { margin:0 0 12px 0; color:#e2e2e2; font-size:24px; }
-      p { color:#aaa; font-size:14px; margin:0 0 24px 0; }
-      .btn { display:inline-block; padding:12px 28px; border-radius:8px; background:#e94560; color:#fff; border:0; font-size:15px; font-weight:600; cursor:pointer; text-decoration:none; }
-      .btn-ghost { background:transparent; border:1px solid #0f3460; color:#aaa; margin-left:10px; }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background-image: url('/bg.png');
+        background-size: cover;
+        background-position: center;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .card {
+        width: 100%;
+        max-width: 380px;
+        background: rgba(10, 14, 30, 0.8);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 40px 36px;
+        text-align: center;
+        box-shadow: 0 0 0 1px rgba(255,215,0,0.04), 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+        animation: fadeUp 0.4s ease both;
+      }
+      .card-icon { font-size: 36px; display: block; margin-bottom: 10px; }
+      h2 {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #fff 0%, #ffd700 60%, #ffaa00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+      }
+      p {
+        color: rgba(255,255,255,0.4);
+        font-size: 14px;
+        margin-bottom: 28px;
+      }
+      .actions { display: flex; gap: 10px; justify-content: center; }
+      .btn {
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        transition: opacity 0.15s, transform 0.1s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+      }
+      .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+      .btn:active { transform: translateY(0); }
+      .btn-danger {
+        background: linear-gradient(135deg, #e94560, #c4314f);
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(233,69,96,0.3);
+      }
+      .btn-ghost {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: rgba(255,255,255,0.6);
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
     </style>
   </head>
   <body>
     <div class="card">
+      <span class="card-icon">👋</span>
       <h2>Uitloggen</h2>
       <p>Weet je zeker dat je wilt uitloggen?</p>
-      <button class="btn" id="confirmBtn">Uitloggen</button>
-      <a href="/" class="btn btn-ghost">Annuleren</a>
+      <div class="actions">
+        <button class="btn btn-danger" id="confirmBtn">Uitloggen</button>
+        <a href="/" class="btn btn-ghost">Annuleren</a>
+      </div>
     </div>
     <script>
-      document.getElementById('confirmBtn').addEventListener('click', () => {
+      document.getElementById('confirmBtn')?.addEventListener('click', () => {
         localStorage.removeItem('token');
         location.href = '/login';
       });

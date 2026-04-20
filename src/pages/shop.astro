@@ -5,52 +5,207 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shop — Blackjack</title>
     <style>
-      * { box-sizing:border-box; font-family:Inter, system-ui, sans-serif; }
-      body { margin:0; background:#0b0b0b; background-image:url('/bg.png'); background-size:cover; background-position:center; background-attachment:fixed; color:#e2e2e2; min-height:100vh; }
-      header { display:flex; align-items:center; justify-content:space-between; padding:16px 32px; border-bottom:1px solid #0f3460; background:rgba(11,11,11,0.55); backdrop-filter:blur(6px); }
-      header h1 { margin:0; font-size:20px; color:#ffd700; }
-      header a { color:#e94560; text-decoration:none; font-size:14px; }
-      .shop { background:rgba(13,27,42,0.6); backdrop-filter:blur(4px); border:1px solid #0f3460; border-radius:16px; max-width:700px; margin:40px auto; padding:32px 20px; }
-      .shop { max-width:700px; margin:40px auto; padding:0 20px; }
-      .shop h2 { margin:0 0 8px 0; font-size:28px; }
-      .shop p { color:#888; margin:0 0 32px 0; }
-      .packages { display:flex; flex-wrap:wrap; gap:20px; }
-      .pkg { background:#16213e; border:1px solid #0f3460; border-radius:14px; padding:24px; width:180px; }
-      .pkg .coins { font-size:22px; font-weight:700; color:#ffd700; margin-bottom:6px; }
-      .pkg .price { color:#aaa; font-size:15px; margin-bottom:16px; }
-      .pkg button { width:100%; padding:10px; border-radius:8px; background:#e94560; color:#fff; border:0; font-size:14px; font-weight:600; cursor:pointer; }
-      .pkg button:disabled { background:#555; cursor:default; }
-      #msg { margin-top:20px; font-size:14px; min-height:20px; }
-      .ok { color:#6bff91; } .err { color:#ff6b6b; }
-      .success-banner { background:#1a3a1a; border:1px solid #2d8b5b; color:#6bff91; padding:14px 20px; border-radius:10px; margin-bottom:24px; }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        min-height: 100vh;
+        background-image: url('/bg.png');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: rgba(255,255,255,0.85);
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 32px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        background: rgba(10,14,30,0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      header h1 {
+        font-size: 18px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff 0%, #ffd700 80%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      header a {
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: color 0.15s;
+      }
+      header a:hover { color: rgba(255,255,255,0.8); }
+      .page {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 40px 24px 60px;
+      }
+      .page-header { margin-bottom: 32px; }
+      .page-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #fff 0%, #ffd700 60%, #ffaa00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 6px;
+      }
+      .page-header p { color: rgba(255,255,255,0.35); font-size: 14px; }
+      .success-banner {
+        background: rgba(45,139,91,0.15);
+        border: 1px solid rgba(45,139,91,0.3);
+        color: #6bff91;
+        padding: 14px 18px;
+        border-radius: 12px;
+        margin-bottom: 28px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .packages {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+      }
+      .pkg {
+        background: rgba(10,14,30,0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .pkg::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,215,0,0.04) 0%, transparent 60%);
+        pointer-events: none;
+      }
+      .pkg:hover {
+        border-color: rgba(255,215,0,0.25);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,215,0,0.1);
+      }
+      .pkg-popular {
+        border-color: rgba(255,215,0,0.25);
+        box-shadow: 0 0 0 1px rgba(255,215,0,0.1);
+      }
+      .popular-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(255,215,0,0.15);
+        border: 1px solid rgba(255,215,0,0.3);
+        color: #ffd700;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 20px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .pkg-icon { font-size: 28px; margin-bottom: 8px; }
+      .pkg .coins {
+        font-size: 24px;
+        font-weight: 800;
+        color: #ffd700;
+        text-shadow: 0 0 12px rgba(255,215,0,0.3);
+        line-height: 1;
+      }
+      .pkg .coins-label {
+        font-size: 12px;
+        color: rgba(255,255,255,0.35);
+        margin-bottom: 12px;
+      }
+      .pkg .price {
+        color: rgba(255,255,255,0.5);
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      .pkg button {
+        width: 100%;
+        padding: 11px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #e94560, #c4314f);
+        color: #fff;
+        border: none;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(233,69,96,0.25);
+        transition: opacity 0.15s, transform 0.1s;
+      }
+      .pkg button:hover { opacity: 0.9; transform: translateY(-1px); }
+      .pkg button:active { transform: translateY(0); }
+      .pkg button:disabled { background: rgba(255,255,255,0.08); box-shadow: none; cursor: default; transform: none; }
+      #msg { margin-top: 20px; font-size: 14px; min-height: 20px; }
+      .ok { color: #6bff91; } .err { color: #ff6b6b; }
     </style>
   </head>
   <body>
     <header>
-      <h1>Coin Shop</h1>
+      <h1>🪙 Coin Shop</h1>
       <a href="/">← Terug naar lobby</a>
     </header>
-    <div class="shop">
-      <h2>Koop coins</h2>
-      <p>Betaal veilig via iDEAL. Coins worden direct bijgeschreven na betaling.</p>
+    <div class="page">
+      <div class="page-header">
+        <h2>Koop coins</h2>
+        <p>Betaal veilig via iDEAL. Coins worden direct bijgeschreven na betaling.</p>
+      </div>
 
       <div id="success-banner" style="display:none" class="success-banner">
-        Betaling ontvangen! Je coins zijn bijgeschreven.
+        ✅ Betaling ontvangen! Je coins zijn bijgeschreven.
       </div>
 
       <div class="packages">
         <div class="pkg">
+          <div class="pkg-icon">🪙</div>
           <div class="coins">1.000</div>
+          <div class="coins-label">coins</div>
           <div class="price">€ 1,00</div>
           <button data-pkg="p1">Kopen</button>
         </div>
-        <div class="pkg">
+        <div class="pkg pkg-popular">
+          <div class="popular-badge">Populair</div>
+          <div class="pkg-icon">💰</div>
           <div class="coins">5.000</div>
+          <div class="coins-label">coins</div>
           <div class="price">€ 5,00</div>
           <button data-pkg="p5">Kopen</button>
         </div>
         <div class="pkg">
+          <div class="pkg-icon">💎</div>
           <div class="coins">10.000</div>
+          <div class="coins-label">coins</div>
           <div class="price">€ 10,00</div>
           <button data-pkg="p10">Kopen</button>
         </div>
@@ -59,34 +214,34 @@
     </div>
 
     <script>
-      // Show success banner if redirected from Mollie
       if (new URLSearchParams(location.search).get('payment') === 'success') {
-        document.getElementById('success-banner').style.display = 'block';
+        (document.getElementById('success-banner') as HTMLElement).style.display = 'flex';
       }
 
       document.querySelectorAll('[data-pkg]').forEach(btn => {
         btn.addEventListener('click', async () => {
           const token = localStorage.getItem('token');
-          const msg = document.getElementById('msg');
+          const msg = document.getElementById('msg') as HTMLElement;
+          const buttonEl = btn as HTMLButtonElement;
           if (!token) { location.href = '/login'; return; }
-          btn.disabled = true; btn.textContent = 'Bezig...';
+          buttonEl.disabled = true; buttonEl.textContent = 'Bezig...';
           msg.textContent = ''; msg.className = '';
           try {
             const res = await fetch('/api/create-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-              body: JSON.stringify({ packageId: btn.dataset.pkg })
+              body: JSON.stringify({ packageId: buttonEl.dataset.pkg })
             });
             const data = await res.json();
             if (res.ok && data.paymentUrl) {
               location.href = data.paymentUrl;
             } else {
               msg.className = 'err'; msg.textContent = data.error || 'Betaling mislukt';
-              btn.disabled = false; btn.textContent = 'Kopen';
+              buttonEl.disabled = false; buttonEl.textContent = 'Kopen';
             }
           } catch {
             msg.className = 'err'; msg.textContent = 'Netwerkfout';
-            btn.disabled = false; btn.textContent = 'Kopen';
+            buttonEl.disabled = false; buttonEl.textContent = 'Kopen';
           }
         });
       });

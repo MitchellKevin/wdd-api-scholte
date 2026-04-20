@@ -2,32 +2,135 @@
 // Simple mock payment landing page for testing the shop flow.
 ---
 <!doctype html>
-<html>
+<html lang="nl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mock Payment</title>
-    <style>body{font-family:system-ui, -apple-system, sans-serif;padding:24px} button{padding:10px 14px;border-radius:8px;background:#0b6cff;color:white;border:0}</style>
+    <title>Mock Betaling — Blackjack</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background-image: url('/bg.png');
+        background-size: cover;
+        background-position: center;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .card {
+        width: 100%;
+        max-width: 400px;
+        background: rgba(10,14,30,0.8);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 40px 36px;
+        box-shadow: 0 0 0 1px rgba(255,215,0,0.04), 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+        animation: fadeUp 0.4s ease both;
+        text-align: center;
+      }
+      .card-icon { font-size: 36px; display: block; margin-bottom: 10px; }
+      h1 {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #fff 0%, #ffd700 60%, #ffaa00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+      }
+      .dev-badge {
+        display: inline-block;
+        background: rgba(233,69,96,0.12);
+        border: 1px solid rgba(233,69,96,0.25);
+        color: #e94560;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 20px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .info-box {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 24px;
+        text-align: left;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 4px 0;
+      }
+      .info-row span:first-child { color: rgba(255,255,255,0.35); }
+      .info-row span:last-child { color: rgba(255,255,255,0.75); font-weight: 600; font-variant-numeric: tabular-nums; }
+      button {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #2d8b5b, #1f6642);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(45,139,91,0.3);
+        transition: opacity 0.15s, transform 0.1s;
+      }
+      button:hover { opacity: 0.9; transform: translateY(-1px); }
+      button:active { transform: translateY(0); }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    </style>
   </head>
   <body>
-    <h1>Mock Payment Page</h1>
-    <p id="info"></p>
-    <p>
-      <button id="complete">Simulate successful payment</button>
-    </p>
+    <div class="card">
+      <span class="card-icon">🏦</span>
+      <h1>Mock Betaling</h1>
+      <span class="dev-badge">Development only</span>
+      <div class="info-box">
+        <div class="info-row"><span>Session</span><span id="info-session">–</span></div>
+        <div class="info-row"><span>Pakket</span><span id="info-pkg">–</span></div>
+      </div>
+      <button id="complete">✅ Simuleer geslaagde betaling</button>
+    </div>
     <script>
       const params = new URLSearchParams(location.search);
       const session = params.get('session');
       const pkg = params.get('pkg');
-      const infoEl = document.getElementById('info');
+      const sessionEl = document.getElementById('info-session') as HTMLElement;
+      const pkgEl = document.getElementById('info-pkg') as HTMLElement;
+      if (sessionEl) sessionEl.textContent = session || '–';
+      if (pkgEl) pkgEl.textContent = pkg || '–';
       const completeBtn = document.getElementById('complete');
-      if(infoEl) infoEl.textContent = `Session: ${session} — Package: ${pkg}`;
-      if(completeBtn) completeBtn.addEventListener('click', async ()=>{
-        // call webhook stub to simulate Mollie webhook sending payment success
-        const res = await fetch('/api/payment-webhook.json', { method: 'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ session, packageId: pkg, status: 'paid' }) });
+      if (completeBtn) completeBtn.addEventListener('click', async () => {
+        const res = await fetch('/api/payment-webhook.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session, packageId: pkg, status: 'paid' })
+        });
         const j = await res.json();
         alert('Webhook response: ' + JSON.stringify(j));
-        // go back to shop
         location.href = '/shop';
       });
     </script>

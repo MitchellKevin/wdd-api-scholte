@@ -5,31 +5,175 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Account — Blackjack</title>
     <style>
-      * { box-sizing:border-box; font-family:Inter, system-ui, sans-serif; }
-      body { display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background-image: url('./bg.png'); background-size: cover;  }
-      .card { background:#16213e; border:1px solid #0f3460; border-radius:16px; padding:36px 40px; width:100%; max-width:420px; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
-      h2 { margin:0 0 24px 0; color:#e2e2e2; font-size:24px; text-align:center; }
-      .row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #0f3460; color:#ccc; font-size:15px; }
-      .coins { font-size:22px; font-weight:700; color:#ffd700; }
-      .actions { margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; }
-      .btn { flex:1; min-width:100px; padding:11px; border-radius:8px; border:0; font-size:14px; font-weight:600; cursor:pointer; text-align:center; text-decoration:none; display:inline-block; }
-      .btn-primary { background:#e94560; color:#fff; }
-      .btn-secondary { background:#0f3460; color:#e2e2e2; }
-      .btn-reward { background:#2d8b5b; color:#fff; width:100%; margin-top:10px; }
-      .btn-logout { background:transparent; border:1px solid #e94560; color:#e94560; width:100%; margin-top:6px; }
-      #reward-msg { margin-top:10px; text-align:center; font-size:13px; min-height:18px; }
-      .ok { color:#6bff91; } .err { color:#ff6b6b; }
-      #not-logged { display:none; text-align:center; color:#aaa; }
-      #not-logged a { color:#e94560; text-decoration:none; }
-      #account-card { display:none; }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background-image: url('./bg.png');
+        background-size: cover;
+        background-position: center;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(10, 14, 30, 0.8);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 36px 32px;
+        box-shadow: 0 0 0 1px rgba(255,215,0,0.04), 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+        animation: fadeUp 0.4s ease both;
+      }
+      .profile-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 28px;
+      }
+      .avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a2a4a, #0f3460);
+        border: 2px solid rgba(255,215,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 800;
+        color: rgba(255,255,255,0.85);
+        margin-bottom: 12px;
+        box-shadow: 0 0 20px rgba(255,215,0,0.15);
+      }
+      h2 {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #fff 0%, #ffd700 60%, #ffaa00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .stats {
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .stat-row:last-child { border-bottom: none; }
+      .stat-label {
+        color: rgba(255,255,255,0.4);
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .stat-value {
+        color: rgba(255,255,255,0.85);
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .stat-value.coins {
+        font-size: 20px;
+        font-weight: 800;
+        color: #ffd700;
+        text-shadow: 0 0 12px rgba(255,215,0,0.3);
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .btn {
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        transition: opacity 0.15s, transform 0.1s;
+      }
+      .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+      .btn:active { transform: translateY(0); }
+      .btn-primary {
+        background: linear-gradient(135deg, #e94560, #c4314f);
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(233,69,96,0.25);
+      }
+      .btn-secondary {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: rgba(255,255,255,0.7);
+      }
+      .btn-reward {
+        width: 100%;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #2d8b5b, #1f6642);
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(45,139,91,0.25);
+      }
+      .btn-logout {
+        width: 100%;
+        background: transparent;
+        border: 1px solid rgba(233,69,96,0.3) !important;
+        color: rgba(233,69,96,0.8);
+      }
+      .btn-logout:hover { background: rgba(233,69,96,0.08); }
+      #reward-msg { margin-top: 8px; text-align: center; font-size: 13px; min-height: 18px; }
+      .ok { color: #6bff91; } .err { color: #ff6b6b; }
+      #not-logged {
+        display: none;
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+        font-size: 14px;
+      }
+      #not-logged a { color: #e94560; text-decoration: none; font-weight: 600; }
+      #account-card { display: none; }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
     </style>
   </head>
   <body>
     <div class="card" id="account-card">
-      <h2>Mijn Account</h2>
-      <div class="row"><span>Gebruikersnaam</span><strong id="user-name">–</strong></div>
-      <div class="row"><span>Coins</span><span class="coins" id="user-coins">–</span></div>
-      <div class="row"><span>Lid sinds</span><strong id="user-created">–</strong></div>
+      <div class="profile-header">
+        <div class="avatar" id="avatar-initials">–</div>
+        <h2 id="user-name">–</h2>
+      </div>
+      <div class="stats">
+        <div class="stat-row">
+          <span class="stat-label">🪙 Coins</span>
+          <span class="stat-value coins" id="user-coins">–</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">📅 Lid sinds</span>
+          <span class="stat-value" id="user-created">–</span>
+        </div>
+      </div>
       <div class="actions">
         <a href="/shop" class="btn btn-primary">Coins kopen</a>
         <a href="/" class="btn btn-secondary">Spelen</a>
@@ -38,25 +182,26 @@
       <p id="reward-msg"></p>
       <button class="btn btn-logout" id="logout-btn">Uitloggen</button>
     </div>
-    <div id="not-logged">
+    <div id="not-logged" class="card" style="display:none">
       <p>Niet ingelogd. <a href="/login">Inloggen</a> of <a href="/signup">registreren</a>.</p>
     </div>
     <script>
       async function loadAccount() {
         const token = localStorage.getItem('token');
-        if (!token) { document.getElementById('not-logged').style.display = 'block'; return; }
+        if (!token) { (document.getElementById('not-logged') as HTMLElement).style.display = 'block'; return; }
         const res = await fetch('/api/me', { headers: { Authorization: 'Bearer ' + token }, credentials: 'include' });
-        if (!res.ok) { localStorage.removeItem('token'); document.getElementById('not-logged').style.display = 'block'; return; }
+        if (!res.ok) { localStorage.removeItem('token'); (document.getElementById('not-logged') as HTMLElement).style.display = 'block'; return; }
         const me = await res.json();
-        document.getElementById('user-name').textContent = me.username;
-        document.getElementById('user-coins').textContent = (me.coins_amount ?? 0).toLocaleString('nl-NL');
-        document.getElementById('user-created').textContent = me.createdAt ? new Date(me.createdAt).toLocaleDateString('nl-NL') : '–';
-        document.getElementById('account-card').style.display = 'block';
+        (document.getElementById('user-name') as HTMLElement).textContent = me.username;
+        (document.getElementById('user-coins') as HTMLElement).textContent = (me.coins_amount ?? 0).toLocaleString('nl-NL');
+        (document.getElementById('user-created') as HTMLElement).textContent = me.createdAt ? new Date(me.createdAt).toLocaleDateString('nl-NL') : '–';
+        (document.getElementById('avatar-initials') as HTMLElement).textContent = me.username.slice(0, 2).toUpperCase();
+        (document.getElementById('account-card') as HTMLElement).style.display = 'block';
       }
 
-      document.getElementById('reward-btn').addEventListener('click', async () => {
+      document.getElementById('reward-btn')?.addEventListener('click', async () => {
         const token = localStorage.getItem('token');
-        const msg = document.getElementById('reward-msg');
+        const msg = document.getElementById('reward-msg') as HTMLElement;
         try {
           const res = await fetch('/api/daily-reward', { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
           const data = await res.json();
@@ -64,7 +209,7 @@
             msg.className = 'ok'; msg.textContent = data.message;
             loadAccount();
           } else {
-            const next = data.nextClaimAt ? ' Morgen weer: ' + new Date(data.nextClaimAt).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' }) : '';
+            const next = data.nextClaimAt ? ' Morgen weer: ' + new Date(data.nextClaimAt).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : '';
             msg.className = 'err'; msg.textContent = data.message + next;
           }
         } catch {
@@ -72,7 +217,7 @@
         }
       });
 
-      document.getElementById('logout-btn').addEventListener('click', () => {
+      document.getElementById('logout-btn')?.addEventListener('click', () => {
         localStorage.removeItem('token');
         document.cookie = 'session=; Path=/; Max-Age=0';
         location.href = '/login';
@@ -80,9 +225,7 @@
 
       loadAccount();
 
-      window.addEventListener('pageshow', (e) => {
-        if (e.persisted) loadAccount();
-      });
+      window.addEventListener('pageshow', (e) => { if (e.persisted) loadAccount(); });
     </script>
   </body>
 </html>
