@@ -15,7 +15,7 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(210,210,21,0.06) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -60,7 +60,7 @@ section:first-of-type a {
 
 section:first-of-type a:hover {
   background: rgba(255,255,255,0.1);
-  border-color: rgba(255,215,0,0.2);
+  border-color: rgba(210,210,21,0.2);
 }
 
 img {

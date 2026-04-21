@@ -49,10 +49,10 @@ body {
 .bank-display {
   font-size: 15px;
   font-weight: 700;
-  color: #ffd700;
-  text-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
-  background: rgba(255, 215, 0, 0.08);
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  color: #d2d215;
+  text-shadow: 0 0 12px rgba(210, 210, 21, 0.4);
+  background: rgba(210, 210, 21, 0.08);
+  border: 1px solid rgba(210, 210, 21, 0.2);
   border-radius: 10px;
   padding: 6px 14px;
 }
@@ -108,7 +108,7 @@ body {
 }
 .score-badge.bust { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.4); }
 .score-badge.good { color: #6bff91; border-color: rgba(107, 255, 145, 0.4); }
-.score-badge.blackjack { color: #ffd700; border-color: rgba(255, 215, 0, 0.4); }
+.score-badge.blackjack { color: #d2d215; border-color: rgba(210, 210, 21, 0.4); }
 
 /* ─── Center ring ─────────────────────────────────── */
 .table-center {
@@ -151,7 +151,7 @@ body {
 .outcome-msg.win   { color: #6bff91; background: rgba(107, 255, 145, 0.1); border: 1px solid rgba(107, 255, 145, 0.2); }
 .outcome-msg.lose  { color: #ff6b6b; background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.2); }
 .outcome-msg.push  { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); }
-.outcome-msg.bj    { color: #ffd700; background: rgba(255, 215, 0, 0.12); border: 1px solid rgba(255, 215, 0, 0.3); }
+.outcome-msg.bj    { color: #d2d215; background: rgba(210, 210, 21, 0.12); border: 1px solid rgba(210, 210, 21, 0.3); }
 
 /* ─── Hand ────────────────────────────────────────── */
 .hand {
@@ -321,16 +321,16 @@ body {
 .chip-btn {
   padding: 5px 10px;
   border-radius: 20px;
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.2);
-  color: #ffd700;
+  background: rgba(210, 210, 21, 0.1);
+  border: 1px solid rgba(210, 210, 21, 0.2);
+  color: #d2d215;
   font-size: 12px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
 }
-.chip-btn:hover { background: rgba(255, 215, 0, 0.2); transform: translateY(-1px); }
+.chip-btn:hover { background: rgba(210, 210, 21, 0.2); transform: translateY(-1px); }
 .chip-btn:active { transform: translateY(0); }
 
 #betAmount {
@@ -346,7 +346,7 @@ body {
   text-align: center;
   transition: border-color 0.15s;
 }
-#betAmount:focus { outline: none; border-color: rgba(255, 215, 0, 0.4); }
+#betAmount:focus { outline: none; border-color: rgba(210, 210, 21, 0.4); }
 
 .action-row {
   display: flex;
@@ -369,7 +369,7 @@ body {
 .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .btn-new   { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12) !important; color: rgba(255,255,255,0.6); font-size: 16px; padding: 11px 16px; }
-.btn-deal  { background: linear-gradient(135deg, #ffd700, #e5a800); color: #000; box-shadow: 0 4px 16px rgba(255,215,0,0.3); }
+.btn-deal  { background: linear-gradient(135deg, #d2d215, #767e1a); color: #fff; box-shadow: 0 4px 16px rgba(210,210,21,0.3); }
 .btn-hit   { background: linear-gradient(135deg, #2d8b5b, #1f6642); color: #fff; box-shadow: 0 4px 16px rgba(45,139,91,0.3); }
 .btn-stand { background: linear-gradient(135deg, #e94560, #c4314f); color: #fff; box-shadow: 0 4px 16px rgba(233,69,96,0.3); }
 

@@ -9,11 +9,20 @@
     <title>Blackjack</title>
     <link rel="stylesheet" href="/index.css" />
     <style>
+	h1{
+		background: linear-gradient(135deg, #fff 0%, #d2d215 80%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+		font-size: 1.5em;
+	}	
+	  
       .lobby {
         display: flex;
         flex-direction: column;
         align-items: center;
+		justify-content: center;
         gap: 20px;
+		height: 100vh;
         padding: 80px 24px;
         position: relative;
         z-index: 1;
@@ -25,10 +34,11 @@
         align-items: center;
         gap: 6px;
       }
-      .user-bar strong { color: #ffd700; font-weight: 700; }
+      .user-bar strong { color: #d2d215; font-weight: 700; }
       .divider { color: rgba(255,255,255,0.15); }
       .room-form {
         display: flex;
+		flex-direction: column;
         gap: 10px;
         width: 100%;
         max-width: 360px;
@@ -109,7 +119,7 @@
   </head>
   <body>
     <header>
-      <h1><img src="/titleFont.png" alt="Blackjack"></h1>
+      <h1>CMD Casino</h1>
       <section>
         <a href="/shop"><img src="/shop.svg" alt="Shop"></a>
         <a href="/account"><img src="/accountIcon.svg" alt="Account"></a>
@@ -121,7 +131,7 @@
         <div class="user-bar">
           Welkom, <strong id="username">–</strong>
           <span class="divider">|</span>
-          🪙 <strong id="coins">–</strong>
+           <strong id="coins">–</strong>
         </div>
         <div id="daily-msg" class="daily-badge" style="display:none"></div>
         <div class="room-form">

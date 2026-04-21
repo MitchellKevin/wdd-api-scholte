@@ -22,7 +22,7 @@
         content: '';
         position: fixed;
         inset: 0;
-        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(210,210,21,0.06) 0%, transparent 70%);
         pointer-events: none;
       }
       .card {
@@ -34,7 +34,7 @@
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 24px;
         padding: 36px 32px;
-        box-shadow: 0 0 0 1px rgba(255,215,0,0.04), 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+        box-shadow: 0 0 0 1px rgba(210,210,21,0.04), 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
         animation: fadeUp 0.4s ease both;
       }
       .profile-header {
@@ -48,7 +48,7 @@
         height: 64px;
         border-radius: 50%;
         background: linear-gradient(135deg, #1a2a4a, #0f3460);
-        border: 2px solid rgba(255,215,0,0.3);
+        border: 2px solid rgba(210,210,21,0.3);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -56,13 +56,13 @@
         font-weight: 800;
         color: rgba(255,255,255,0.85);
         margin-bottom: 12px;
-        box-shadow: 0 0 20px rgba(255,215,0,0.15);
+        box-shadow: 0 0 20px rgba(210,210,21,0.15);
       }
       h2 {
         font-size: 22px;
         font-weight: 800;
         letter-spacing: -0.5px;
-        background: linear-gradient(135deg, #fff 0%, #ffd700 60%, #ffaa00 100%);
+        background: linear-gradient(135deg, #fff 0%, #d2d215 60%, #a8ac14 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -94,8 +94,8 @@
       .stat-value.coins {
         font-size: 20px;
         font-weight: 800;
-        color: #ffd700;
-        text-shadow: 0 0 12px rgba(255,215,0,0.3);
+        color: #d2d215;
+        text-shadow: 0 0 12px rgba(210,210,21,0.3);
       }
       .actions {
         display: grid;
@@ -166,11 +166,11 @@
       </div>
       <div class="stats">
         <div class="stat-row">
-          <span class="stat-label">🪙 Coins</span>
+          <span class="stat-label">Coins</span>
           <span class="stat-value coins" id="user-coins">–</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">📅 Lid sinds</span>
+          <span class="stat-label">Lid sinds</span>
           <span class="stat-value" id="user-created">–</span>
         </div>
       </div>
@@ -178,7 +178,7 @@
         <a href="/shop" class="btn btn-primary">Coins kopen</a>
         <a href="/" class="btn btn-secondary">Spelen</a>
       </div>
-      <button class="btn btn-reward" id="reward-btn">🎁 Dagelijkse beloning (+1000 coins)</button>
+      <button class="btn btn-reward" id="reward-btn">Dagelijkse beloning (+1000 coins)</button>
       <p id="reward-msg"></p>
       <button class="btn btn-logout" id="logout-btn">Uitloggen</button>
     </div>

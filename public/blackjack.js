@@ -287,7 +287,7 @@ async function finishHand(){
     type = 'lose';
     flashCards(playerHandEl, 'lose');
   } else if(dv > 21){
-    outcome = 'Dealer bust — gewonnen! 🎉';
+    outcome = 'Dealer bust — gewonnen!';
     type = 'win';
     bank += bet * 2;
     flashCards(playerHandEl, 'win');
@@ -296,12 +296,12 @@ async function finishHand(){
     type = 'push';
     bank += bet;
   } else if(pv === 21 && player.hand.length === 2){
-    outcome = 'Blackjack! 🃏 +1.5x';
+    outcome = 'Blackjack! +1.5x';
     type = 'bj';
     bank += Math.floor(bet * 2.5);
     flashCards(playerHandEl, 'win');
   } else if(pv > dv){
-    outcome = 'Je wint! 🎉';
+    outcome = 'Je wint!';
     type = 'win';
     bank += bet * 2;
     flashCards(playerHandEl, 'win');

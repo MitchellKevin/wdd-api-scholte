@@ -20,7 +20,7 @@
         content: '';
         position: fixed;
         inset: 0;
-        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%);
+        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(210,210,21,0.06) 0%, transparent 70%);
         pointer-events: none;
       }
       header {
@@ -39,7 +39,7 @@
       header h1 {
         font-size: 18px;
         font-weight: 800;
-        background: linear-gradient(135deg, #fff 0%, #ffd700 80%);
+        background: linear-gradient(135deg, #fff 0%, #d2d215 80%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -62,7 +62,7 @@
         font-size: 28px;
         font-weight: 800;
         letter-spacing: -0.5px;
-        background: linear-gradient(135deg, #fff 0%, #ffd700 60%, #ffaa00 100%);
+        background: linear-gradient(135deg, #fff 0%, #d2d215 60%, #a8ac14 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -105,25 +105,25 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(255,215,0,0.04) 0%, transparent 60%);
+        background: linear-gradient(135deg, rgba(210,210,21,0.04) 0%, transparent 60%);
         pointer-events: none;
       }
       .pkg:hover {
-        border-color: rgba(255,215,0,0.25);
+        border-color: rgba(210,210,21,0.25);
         transform: translateY(-3px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,215,0,0.1);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(210,210,21,0.1);
       }
       .pkg-popular {
-        border-color: rgba(255,215,0,0.25);
-        box-shadow: 0 0 0 1px rgba(255,215,0,0.1);
+        border-color: rgba(210,210,21,0.25);
+        box-shadow: 0 0 0 1px rgba(210,210,21,0.1);
       }
       .popular-badge {
         position: absolute;
         top: 12px;
         right: 12px;
-        background: rgba(255,215,0,0.15);
-        border: 1px solid rgba(255,215,0,0.3);
-        color: #ffd700;
+        background: rgba(210,210,21,0.15);
+        border: 1px solid rgba(210,210,21,0.3);
+        color: #d2d215;
         font-size: 10px;
         font-weight: 700;
         padding: 3px 8px;
@@ -135,8 +135,8 @@
       .pkg .coins {
         font-size: 24px;
         font-weight: 800;
-        color: #ffd700;
-        text-shadow: 0 0 12px rgba(255,215,0,0.3);
+        color: #d2d215;
+        text-shadow: 0 0 12px rgba(210,210,21,0.3);
         line-height: 1;
       }
       .pkg .coins-label {
@@ -173,7 +173,7 @@
   </head>
   <body>
     <header>
-      <h1>🪙 Coin Shop</h1>
+      <h1>CMD Shop</h1>
       <a href="/">← Terug naar lobby</a>
     </header>
     <div class="page">
@@ -183,12 +183,11 @@
       </div>
 
       <div id="success-banner" style="display:none" class="success-banner">
-        ✅ Betaling ontvangen! Je coins zijn bijgeschreven.
+        Betaling ontvangen! Je coins zijn bijgeschreven.
       </div>
 
       <div class="packages">
         <div class="pkg">
-          <div class="pkg-icon">🪙</div>
           <div class="coins">1.000</div>
           <div class="coins-label">coins</div>
           <div class="price">€ 1,00</div>
@@ -196,14 +195,12 @@
         </div>
         <div class="pkg pkg-popular">
           <div class="popular-badge">Populair</div>
-          <div class="pkg-icon">💰</div>
           <div class="coins">5.000</div>
           <div class="coins-label">coins</div>
           <div class="price">€ 5,00</div>
           <button data-pkg="p5">Kopen</button>
         </div>
         <div class="pkg">
-          <div class="pkg-icon">💎</div>
           <div class="coins">10.000</div>
           <div class="coins-label">coins</div>
           <div class="price">€ 10,00</div>
