@@ -9,7 +9,7 @@ export async function POST({ request }){
     const body = await request.json();
     const score = Number(body.score) || 0;
     const userSub = String(user._id);
-    saveScore(userSub, score);
+    await saveScore(userSub, score);
     return new Response(JSON.stringify({ ok:true }), { status: 200 });
   }catch(e){
     console.error('score.post err', e && e.message);
@@ -23,7 +23,7 @@ export async function GET({ request }){
     const user = await getSession(token);
     if(!user) return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 });
     const userSub = String(user._id);
-    const r = getScore(userSub);
+    const r = await getScore(userSub);
     return new Response(JSON.stringify({ score: r ? r.score : 0, updated_at: r ? r.updated_at : null }), { status: 200 });
   }catch(e){
     console.error('score.get err', e && e.message);

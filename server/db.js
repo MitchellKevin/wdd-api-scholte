@@ -62,6 +62,25 @@ export async function markPaymentPaid(mollieId) {
   );
 }
 
+// ─── Scores ───────────────────────────────────────────────────────────────────
+
+export async function saveScore(userId, score) {
+  const db = await getDB();
+  await db.collection('users').updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { score, scoreUpdatedAt: new Date() } }
+  );
+}
+
+export async function getScore(userId) {
+  const db = await getDB();
+  const user = await db.collection('users').findOne(
+    { _id: new ObjectId(userId) },
+    { projection: { score: 1, scoreUpdatedAt: 1 } }
+  );
+  return user ? { score: user.score ?? 0, updated_at: user.scoreUpdatedAt ?? null } : null;
+}
+
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
 
 export async function getTopPlayers(limit = 10) {
