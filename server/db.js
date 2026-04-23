@@ -81,6 +81,33 @@ export async function getScore(userId) {
   return user ? { score: user.score ?? 0, updated_at: user.scoreUpdatedAt ?? null } : null;
 }
 
+// ─── Courses ──────────────────────────────────────────────────────────────────
+
+export async function getPurchasedCourses(userId) {
+  const db = await getDB();
+  const user = await db.collection('users').findOne(
+    { _id: new ObjectId(userId) },
+    { projection: { purchased_courses: 1 } }
+  );
+  return user?.purchased_courses ?? [];
+}
+
+export async function buyCourse(userId, courseId, price) {
+  const db = await getDB();
+  const result = await db.collection('users').updateOne(
+    {
+      _id: new ObjectId(userId),
+      coins_amount: { $gte: price },
+      purchased_courses: { $ne: courseId },
+    },
+    {
+      $inc: { coins_amount: -price },
+      $push: { purchased_courses: courseId },
+    }
+  );
+  return result.modifiedCount === 1;
+}
+
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
 
 export async function getTopPlayers(limit = 10) {

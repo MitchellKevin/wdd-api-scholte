@@ -225,3 +225,4 @@ Feedback
 * Refactor file structure
 * CMD style toepassen[x]
 * Easter Egg / als cyd account met profiel foto van cyd
+* Vakken
