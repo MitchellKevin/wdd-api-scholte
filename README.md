@@ -218,11 +218,11 @@ Feedback
 * Niet te ingewikkeld maken
 
 * Dubbel en split toevoegen [x]
-* Leaderbord fixen
-* Database werkend krijgen online
-* Multiplayer (websockets werkend krijgen)
 * Studiepunten ipv coins is leuker voor een CMD casino [x]
-* Refactor file structure
 * CMD style toepassen[x]
-* Easter Egg / als cyd account met profiel foto van cyd
-* Vakken
+* Vakken [x]
+* Easter Egg / als cyd account met profiel foto van cyd 10 M
+* Refactor file structure 1U
+* Multiplayer (websockets werkend krijgen) 10U
+* Leaderbord fixen 5M
+* Database werkend krijgen online 30M
