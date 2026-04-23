@@ -1,0 +1,106 @@
+---
+import '../styles/blackjack.css';
+import '../styles/multiplayer.css';
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Multiplayer Blackjack</title>
+  </head>
+  <body>
+    <main class="bj-stage">
+
+      <header class="bj-header">
+        <div class="header-left">
+          <a href="/" class="back-link">← Lobby</a>
+        </div>
+        <div class="header-center">
+          <span class="room-badge">Kamer <strong id="roomDisplay">–</strong></span>
+          <span class="bank-display"><strong id="bank">–</strong></span>
+        </div>
+        <div class="header-right">
+          <a href="/account" class="account-link">Account</a>
+        </div>
+      </header>
+
+      <div id="statusBanner" class="status-banner">Verbinden...</div>
+
+      <div class="mp-table">
+
+        <!-- Dealer zone -->
+        <div class="zone dealer-zone">
+          <div class="zone-label">Dealer</div>
+          <div id="dealerHand" class="hand"></div>
+          <div class="score-badge" id="dealerScoreBadge">
+            <span id="dealerScore">–</span>
+          </div>
+        </div>
+
+        <!-- Other players row -->
+        <div id="otherPlayersRow" class="other-players-row"></div>
+
+        <!-- My zone -->
+        <div class="zone player-zone" id="myZone">
+          <div id="myHand" class="hand"></div>
+          <div class="score-badge" id="myScoreBadge">
+            <span id="myScore">0</span>
+          </div>
+          <div class="zone-label" id="myLabel">Jij</div>
+        </div>
+
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-panel">
+
+        <!-- Waiting phase -->
+        <div id="ctrlWaiting" class="ctrl-section" style="display:none">
+          <div id="playerList" class="player-list"></div>
+          <p id="waitMsg" class="wait-msg"></p>
+          <button id="startBtn" class="btn-action btn-deal" style="display:none">Start Spel</button>
+        </div>
+
+        <!-- Betting phase -->
+        <div id="ctrlBetting" class="ctrl-section" style="display:none">
+          <div class="bet-section">
+            <label class="bet-label" for="betAmount">Inzet</label>
+            <div class="bet-input-row">
+              <button class="chip-btn" data-set="1">1</button>
+              <button class="chip-btn" data-set="3">3</button>
+              <button class="chip-btn" data-set="5">5</button>
+              <button class="chip-btn" data-set="10">10</button>
+              <input id="betAmount" type="number" value="1" min="1" />
+            </div>
+          </div>
+          <div class="action-row">
+            <button id="betBtn" class="btn-action btn-deal">Inzet Plaatsen</button>
+          </div>
+          <p id="betWaitMsg" class="wait-msg"></p>
+        </div>
+
+        <!-- Playing / dealer phase -->
+        <div id="ctrlPlaying" class="ctrl-section" style="display:none">
+          <div class="action-row">
+            <button id="hitBtn" class="btn-action btn-hit" disabled>Hit</button>
+            <button id="standBtn" class="btn-action btn-stand" disabled>Stand</button>
+          </div>
+          <p id="turnMsg" class="wait-msg"></p>
+        </div>
+
+        <!-- Results phase -->
+        <div id="ctrlResults" class="ctrl-section" style="display:none">
+          <div id="resultMsg" class="outcome-msg visible push">–</div>
+          <button id="playAgainBtn" class="btn-action btn-deal" style="display:none">Opnieuw Spelen</button>
+        </div>
+
+        <div id="errorMsg" class="error-msg" style="display:none"></div>
+
+      </div>
+
+    </main>
+
+    <script src="../scripts/multiplayer.js"></script>
+  </body>
+</html>

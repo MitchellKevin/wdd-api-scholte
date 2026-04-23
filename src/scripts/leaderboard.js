@@ -59,7 +59,7 @@ async function loadLeaderboard() {
 
       const coinIcon = document.createElement('span');
       coinIcon.className = 'coin-icon';
-      coinIcon.textContent = '🪙';
+      coinIcon.textContent = '';
 
       const coinsEl = document.createElement('span');
       coinsEl.className = 'coins';
