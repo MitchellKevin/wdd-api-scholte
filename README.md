@@ -222,8 +222,8 @@ Feedback
 * CMD style toepassen[x]
 * Vakken [x]
 * Easter Egg / als cyd account met profiel foto van cyd 10 M
-* Refactor file structure 1U
+* Refactor file structure 1U [x]
 * Multiplayer (websockets werkend krijgen) 10U
-* Leaderbord fixen 5M
+* Leaderbord fixen 5M [x]
 * Database werkend krijgen online 30M
 * CRUD toevoegen bij gebruikers
