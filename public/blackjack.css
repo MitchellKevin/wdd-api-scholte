@@ -368,10 +368,36 @@ body {
 .btn-action:active:not(:disabled) { transform: translateY(0); }
 .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
 
-.btn-new   { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12) !important; color: rgba(255,255,255,0.6); font-size: 16px; padding: 11px 16px; }
-.btn-deal  { background: linear-gradient(135deg, #d2d215, #767e1a); color: #fff; box-shadow: 0 4px 16px rgba(210,210,21,0.3); }
-.btn-hit   { background: linear-gradient(135deg, #2d8b5b, #1f6642); color: #fff; box-shadow: 0 4px 16px rgba(45,139,91,0.3); }
-.btn-stand { background: linear-gradient(135deg, #e94560, #c4314f); color: #fff; box-shadow: 0 4px 16px rgba(233,69,96,0.3); }
+.btn-new    { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12) !important; color: rgba(255,255,255,0.6); font-size: 16px; padding: 11px 16px; }
+.btn-deal   { background: linear-gradient(135deg, #d2d215, #767e1a); color: #fff; box-shadow: 0 4px 16px rgba(210,210,21,0.3); }
+.btn-hit    { background: linear-gradient(135deg, #2d8b5b, #1f6642); color: #fff; box-shadow: 0 4px 16px rgba(45,139,91,0.3); }
+.btn-stand  { background: linear-gradient(135deg, #e94560, #c4314f); color: #fff; box-shadow: 0 4px 16px rgba(233,69,96,0.3); }
+.btn-double { background: linear-gradient(135deg, #f4a224, #c87d0e); color: #fff; box-shadow: 0 4px 16px rgba(244,162,36,0.3); }
+.btn-split  { background: linear-gradient(135deg, #7b5ea7, #5b3f87); color: #fff; box-shadow: 0 4px 16px rgba(123,94,167,0.3); }
+
+/* ─── Split hands layout ──────────────────────────── */
+.player-hands {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.player-hand-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.3s;
+}
+
+.player-hand-col.done-hand { opacity: 0.45; }
+
+.player-hand-col.active-hand .hand {
+  outline: 2px solid rgba(210, 210, 21, 0.45);
+  outline-offset: 6px;
+  border-radius: 8px;
+}
 
 /* ─── Responsive ──────────────────────────────────── */
 @media (max-width: 600px) {

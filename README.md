@@ -222,4 +222,5 @@ Feedback
 * Leaderbord fixen
 * Database werkend krijgen online
 * Multiplayer (websockets werkend krijgen)
-* Studiepunten ipv coins is leuker voor een CMD casino
+* Studiepunten ipv coins is leuker voor een CMD casino [x]
+* Refactor file structure

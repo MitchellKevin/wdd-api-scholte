@@ -59,6 +59,12 @@ let bet = 50;
 let pendingSave = null;
 let holeRevealed = false;
 
+// Split / double state
+let isSplit = false;
+let splitHandArr = [];
+let splitBet = 0;
+let activeSide = 'main'; // 'main' | 'split'
+
 function getToken(){
   try { return localStorage.getItem('token'); } catch(e){ return null; }
 }
@@ -94,18 +100,25 @@ function saveBalance(){
 
 const dealerHandEl  = document.getElementById('dealerHand');
 const playerHandEl  = document.getElementById('playerHand');
+const splitHandEl   = document.getElementById('splitHand');
+const splitHandWrap = document.getElementById('splitHandWrap');
+const playerHandCol = document.getElementById('playerHandCol');
 const dealerScoreEl = document.getElementById('dealerScore');
 const playerScoreEl = document.getElementById('playerScore');
+const splitScoreEl  = document.getElementById('splitScore');
 const bankEl        = document.getElementById('bank');
 const messageEl     = document.getElementById('message');
 const dealerBadge   = document.getElementById('dealerScoreBadge');
 const playerBadge   = document.getElementById('playerScoreBadge');
+const splitBadge    = document.getElementById('splitScoreBadge');
 
-const dealBtn  = document.getElementById('dealBtn');
-const hitBtn   = document.getElementById('hitBtn');
-const standBtn = document.getElementById('standBtn');
-const newBtn   = document.getElementById('newBtn');
-const betInput = document.getElementById('betAmount');
+const dealBtn   = document.getElementById('dealBtn');
+const hitBtn    = document.getElementById('hitBtn');
+const standBtn  = document.getElementById('standBtn');
+const doubleBtn = document.getElementById('doubleBtn');
+const splitBtn  = document.getElementById('splitBtn');
+const newBtn    = document.getElementById('newBtn');
+const betInput  = document.getElementById('betAmount');
 
 function fatal(msg){
   console.error('Blackjack fatal:', msg);
@@ -132,7 +145,6 @@ function renderHands(hideDealerHole = false){
   const dCount = dEl.children.length;
   const dLen   = dealer.hand.length;
 
-  // Reveal hole card in-place when going from hidden → show
   if(!hideDealerHole && !holeRevealed && dCount > 0){
     const holeEl = dEl.children[0];
     if(holeEl && holeEl.classList.contains('back')){
@@ -142,17 +154,15 @@ function renderHands(hideDealerHole = false){
     }
   }
 
-  // Add new dealer cards
   if(dCount < dLen){
     for(let i = dCount; i < dLen; i++){
       const el = makeCardEl(dealer.hand[i], hideDealerHole && i === 0);
-      // Initial deal: stagger dealer cards at offset +200ms per card
       el.style.animationDelay = dCount === 0 ? `${i * 220}ms` : `${(i - dCount) * 280}ms`;
       dEl.appendChild(el);
     }
   }
 
-  // ── Player ──
+  // ── Player main hand ──
   const pCount = pEl.children.length;
   const pLen   = player.hand.length;
 
@@ -162,6 +172,16 @@ function renderHands(hideDealerHole = false){
       el.style.animationDelay = pCount === 0 ? `${i * 220}ms` : '0ms';
       pEl.appendChild(el);
     }
+  }
+}
+
+function renderSplitHand(){
+  if(!splitHandEl) return;
+  const existing = splitHandEl.children.length;
+  for(let i = existing; i < splitHandArr.length; i++){
+    const el = makeCardEl(splitHandArr[i]);
+    el.style.animationDelay = '0ms';
+    splitHandEl.appendChild(el);
   }
 }
 
@@ -178,7 +198,6 @@ function showOutcome(text, type = 'push'){
   if(!messageEl) return;
   messageEl.className = 'outcome-msg ' + type;
   messageEl.textContent = text;
-  // Force reflow to retrigger transition
   void messageEl.offsetWidth;
   messageEl.classList.add('visible');
 }
@@ -196,19 +215,58 @@ function flashCards(handEl, type){
   });
 }
 
+function updateActionBtns(phase){
+  const playing = phase === 'playing';
+  hitBtn.disabled = !playing;
+  standBtn.disabled = !playing;
+
+  if(playing){
+    const activeHand = activeSide === 'main' ? player.hand : splitHandArr;
+    const activeBetAmt = activeSide === 'main' ? bet : splitBet;
+    doubleBtn.disabled = activeHand.length !== 2 || bank < activeBetAmt;
+    splitBtn.disabled  = isSplit || activeSide !== 'main' ||
+                         player.hand.length !== 2 ||
+                         player.hand[0].rank !== player.hand[1].rank ||
+                         bank < bet;
+  } else {
+    doubleBtn.disabled = true;
+    splitBtn.disabled  = true;
+  }
+}
+
+function updateHandHighlight(){
+  if(!playerHandCol || !splitHandWrap) return;
+  if(isSplit){
+    playerHandCol.classList.toggle('active-hand', activeSide === 'main');
+    splitHandWrap.classList.toggle('active-hand', activeSide === 'split');
+  } else {
+    playerHandCol.classList.remove('active-hand');
+    splitHandWrap.classList.remove('active-hand');
+  }
+}
+
 // ── Game logic ─────────────────────────────────────────────────────────────
 function resetTable(){
   deck = createDeck(); shuffle(deck);
   dealer.hand = [];
   player.hand = [];
   holeRevealed = false;
+  isSplit = false;
+  splitHandArr = [];
+  splitBet = 0;
+  activeSide = 'main';
+
   dealerHandEl.innerHTML = '';
   playerHandEl.innerHTML = '';
+  if(splitHandEl) splitHandEl.innerHTML = '';
+  if(splitHandWrap){ splitHandWrap.style.display = 'none'; splitHandWrap.classList.remove('active-hand','done-hand'); }
+  if(playerHandCol){ playerHandCol.classList.remove('active-hand','done-hand'); }
+
   setScore(dealerScoreEl, dealerBadge, '–');
   setScore(playerScoreEl, playerBadge, '0');
+  if(splitScoreEl && splitBadge) setScore(splitScoreEl, splitBadge, '0');
   hideOutcome();
-  hitBtn.disabled = true;
-  standBtn.disabled = true;
+  updateActionBtns('done');
 }
 
 function dealInitial(){
@@ -216,7 +274,6 @@ function dealInitial(){
   bank -= bet;
   bankEl.textContent = bank.toLocaleString('nl-NL');
 
-  // Push cards: player1, dealer1, player2, dealer2
   player.hand.push(deck.pop());
   dealer.hand.push(deck.pop());
   player.hand.push(deck.pop());
@@ -224,7 +281,6 @@ function dealInitial(){
 
   renderHands(true);
 
-  // Override delays for alternating deal order (p0, d0, p1, d1)
   const pCards = playerHandEl.querySelectorAll('.card');
   const dCards = dealerHandEl.querySelectorAll('.card');
   if(pCards[0]) pCards[0].style.animationDelay = '0ms';
@@ -233,31 +289,87 @@ function dealInitial(){
   if(dCards[1]) dCards[1].style.animationDelay = '540ms';
 
   const pval = handValue(player.hand);
-  const dval = handValue(dealer.hand);
   setScore(playerScoreEl, playerBadge, pval, { bj: pval === 21 });
-  if(pval === 21, dval === 21){
+  if(pval === 21){
     finishHand();
   } else {
-    hitBtn.disabled = false;
-    standBtn.disabled = false;
+    updateActionBtns('playing');
   }
 }
 
 function playerHit(){
+  const activeHand = activeSide === 'main' ? player.hand : splitHandArr;
+  activeHand.push(deck.pop());
+
+  if(activeSide === 'main'){
+    renderHands(true);
+    const pv = handValue(player.hand);
+    setScore(playerScoreEl, playerBadge, pv, { bust: pv > 21 });
+    if(pv > 21) finishHand(); else updateActionBtns('playing');
+  } else {
+    renderSplitHand();
+    const sv = handValue(splitHandArr);
+    setScore(splitScoreEl, splitBadge, sv, { bust: sv > 21 });
+    if(sv > 21) finishHand(); else updateActionBtns('playing');
+  }
+}
+
+function doDouble(){
+  const activeBetAmt = activeSide === 'main' ? bet : splitBet;
+  bank -= activeBetAmt;
+  if(activeSide === 'main') bet *= 2; else splitBet *= 2;
+  bankEl.textContent = bank.toLocaleString('nl-NL');
+
+  const activeHand = activeSide === 'main' ? player.hand : splitHandArr;
+  activeHand.push(deck.pop());
+
+  if(activeSide === 'main'){
+    renderHands(true);
+    const pv = handValue(player.hand);
+    setScore(playerScoreEl, playerBadge, pv, { bust: pv > 21 });
+  } else {
+    renderSplitHand();
+    const sv = handValue(splitHandArr);
+    setScore(splitScoreEl, splitBadge, sv, { bust: sv > 21 });
+  }
+  finishHand();
+}
+
+function doSplit(){
+  const secondCard = player.hand.pop();
+  splitHandArr = [secondCard];
+  splitBet = bet;
+  bank -= bet;
+  isSplit = true;
+  activeSide = 'main';
+
+  // Deal one new card to each hand
   player.hand.push(deck.pop());
+  splitHandArr.push(deck.pop());
+
+  // Show split area
+  if(splitHandWrap) splitHandWrap.style.display = '';
+
+  // Re-render both hands from scratch
+  playerHandEl.innerHTML = '';
   renderHands(true);
-  const pv = handValue(player.hand);
-  setScore(playerScoreEl, playerBadge, pv, { bust: pv > 21 });
-  if(pv > 21) finishHand();
+  if(splitHandEl) splitHandEl.innerHTML = '';
+  renderSplitHand();
+
+  setScore(playerScoreEl, playerBadge, handValue(player.hand));
+  setScore(splitScoreEl, splitBadge, handValue(splitHandArr));
+  bankEl.textContent = bank.toLocaleString('nl-NL');
+
+  updateHandHighlight();
+  updateActionBtns('playing');
 }
 
 async function dealerPlay(){
-  // Reveal hole card with flip animation
   renderHands(false);
   let dv = handValue(dealer.hand);
   setScore(dealerScoreEl, dealerBadge, dv);
 
-  await delay(480); // wait for flip
+  await delay(480);
 
   while(dv < 17 && deck.length > 0){
     const card = deck.pop();
@@ -270,55 +382,113 @@ async function dealerPlay(){
   }
 }
 
-async function finishHand(){
-  hitBtn.disabled = true;
-  standBtn.disabled = true;
-  await dealerPlay();
-
-  const pv = handValue(player.hand);
-  const dv = handValue(dealer.hand);
-  setScore(dealerScoreEl, dealerBadge, dv, { bust: dv > 21 });
-  setScore(playerScoreEl, playerBadge, pv, { bust: pv > 21, bj: pv === 21 && player.hand.length === 2 });
-
+function resolveHand(pv, dv, handLen, handEl, currentBet, allowBJ = true){
+  let payout = 0;
   let outcome = '';
   let type = 'push';
 
   if(pv > 21){
     outcome = 'Bust — verloren';
     type = 'lose';
-    flashCards(playerHandEl, 'lose');
-  }else if(dv === 21 && dealer.hand.length === 2){
+    flashCards(handEl, 'lose');
+  } else if(dv === 21 && dealer.hand.length === 2){
     outcome = 'Dealer blackjack — verloren!';
     type = 'lose';
-    flashCards(dealerHandEl, 'bj');
   } else if(dv > 21){
     outcome = 'Dealer bust — gewonnen!';
     type = 'win';
-    bank += bet * 2;
-    flashCards(playerHandEl, 'win');
+    payout = currentBet * 2;
+    flashCards(handEl, 'win');
   } else if(pv === dv){
     outcome = 'Gelijkspel';
     type = 'push';
-    bank += bet;
-  } else if(pv === 21 && player.hand.length === 2){
-    outcome = 'Blackjack! +1.5x';
+    payout = currentBet;
+  } else if(allowBJ && pv === 21 && handLen === 2){
+    outcome = 'Blackjack! +1.5×';
     type = 'bj';
-    bank += Math.floor(bet * 2.5);
-    flashCards(playerHandEl, 'win');
+    payout = Math.floor(currentBet * 2.5);
+    flashCards(handEl, 'win');
   } else if(pv > dv){
     outcome = 'Je wint!';
     type = 'win';
-    bank += bet * 2;
-    flashCards(playerHandEl, 'win');
+    payout = currentBet * 2;
+    flashCards(handEl, 'win');
   } else {
     outcome = 'Dealer wint';
     type = 'lose';
-    flashCards(playerHandEl, 'lose');
+    flashCards(handEl, 'lose');
+  }
+
+  return { payout, outcome, type };
+}
+
+async function finishSplitAndDealer(){
+  await dealerPlay();
+
+  const dv = handValue(dealer.hand);
+  setScore(dealerScoreEl, dealerBadge, dv, { bust: dv > 21 });
+
+  if(isSplit){
+    const pv = handValue(player.hand);
+    const sv = handValue(splitHandArr);
+    setScore(playerScoreEl, playerBadge, pv, { bust: pv > 21 });
+    setScore(splitScoreEl, splitBadge, sv, { bust: sv > 21 });
+
+    // Split hands don't get BJ bonus (standard casino rule)
+    const r1 = resolveHand(pv, dv, player.hand.length, playerHandEl, bet, false);
+    const r2 = resolveHand(sv, dv, splitHandArr.length, splitHandEl, splitBet, false);
+
+    bank += r1.payout + r2.payout;
+
+    let combinedOutcome;
+    if(r1.type === r2.type){
+      const labels = { win: 'Beide gewonnen!', lose: 'Beide verloren', push: 'Beide gelijkspel' };
+      combinedOutcome = labels[r1.type] || `${r1.outcome} | ${r2.outcome}`;
+    } else {
+      combinedOutcome = `Hand 1: ${r1.outcome} | Hand 2: ${r2.outcome}`;
+    }
+
+    const totalReturn = r1.payout + r2.payout;
+    const totalStake  = bet + splitBet;
+    const overallType = totalReturn > totalStake ? 'win' : totalReturn === totalStake ? 'push' : 'lose';
+    showOutcome(combinedOutcome, overallType);
+  } else {
+    const pv = handValue(player.hand);
+    setScore(playerScoreEl, playerBadge, pv, { bust: pv > 21, bj: pv === 21 && player.hand.length === 2 });
+
+    const r = resolveHand(pv, dv, player.hand.length, playerHandEl, bet, true);
+    bank += r.payout;
+    showOutcome(r.outcome, r.type);
   }
 
   bankEl.textContent = bank.toLocaleString('nl-NL');
-  showOutcome(outcome, type);
   saveBalance();
+}
+
+async function finishHand(){
+  updateActionBtns('done');
+
+  // If on main hand during split, switch to split hand
+  if(isSplit && activeSide === 'main'){
+    const pv = handValue(player.hand);
+    setScore(playerScoreEl, playerBadge, pv, { bust: pv > 21 });
+    playerHandCol && playerHandCol.classList.add('done-hand');
+    playerHandCol && playerHandCol.classList.remove('active-hand');
+
+    activeSide = 'split';
+    updateHandHighlight();
+
+    const sv = handValue(splitHandArr);
+    if(sv === 21 && splitHandArr.length === 2){
+      // Auto-stand split blackjack
+      await finishSplitAndDealer();
+    } else {
+      updateActionBtns('playing');
+    }
+    return;
+  }
+
+  await finishSplitAndDealer();
 }
 
 // ── Chip quick-set ─────────────────────────────────────────────────────────
@@ -332,13 +502,9 @@ document.querySelectorAll('.chip-btn').forEach(btn => {
 resetTable();
 loadBalance().catch(() => {});
 
-if(dealBtn) dealBtn.addEventListener('click', () => {
-  resetTable();
-  dealInitial();
-});
-
-if(hitBtn) hitBtn.addEventListener('click', () => { playerHit(); });
-
-if(standBtn) standBtn.addEventListener('click', () => { finishHand(); });
-
-if(newBtn) newBtn.addEventListener('click', () => { resetTable(); });
+if(dealBtn)   dealBtn.addEventListener('click',  () => { resetTable(); dealInitial(); });
+if(hitBtn)    hitBtn.addEventListener('click',   () => { playerHit(); });
+if(standBtn)  standBtn.addEventListener('click', () => { finishHand(); });
+if(doubleBtn) doubleBtn.addEventListener('click',() => { doDouble(); });
+if(splitBtn)  splitBtn.addEventListener('click', () => { doSplit(); });
+if(newBtn)    newBtn.addEventListener('click',   () => { resetTable(); });
