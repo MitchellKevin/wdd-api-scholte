@@ -217,11 +217,11 @@ Feedback
 * Poker laten zitten
 * Niet te ingewikkeld maken
 
-* Dubbel en split toevoegen
-* Back card cmd icoon met kaarten
+* Dubbel en split toevoegen [x]
 * Leaderbord fixen
 * Database werkend krijgen online
 * Multiplayer (websockets werkend krijgen)
 * Studiepunten ipv coins is leuker voor een CMD casino [x]
 * Refactor file structure
 * CMD style toepassen[x]
+* Easter Egg / als cyd account met profiel foto van cyd
