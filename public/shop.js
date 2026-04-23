@@ -1,9 +1,7 @@
 const PACKAGES = [
-  { id: 'p1', coins: 1000, price_cents: 100, price_eur: '€1' },
-  { id: 'p5', coins: 5000, price_cents: 500, price_eur: '€5' },
-  { id: 'p10', coins: 10000, price_cents: 1000, price_eur: '€10' },
-  { id: 'p20', coins: 20000, price_cents: 2000, price_eur: '€20' },
-  { id: 'p50', coins: 50000, price_cents: 5000, price_eur: '€50' },
+  { id: 'p1', coins: 60, price_cents: 260, price_eur: '€2,60' },
+  { id: 'p5', coins: 120, price_cents: 510, price_eur: '€5,10' },
+  { id: 'p10', coins: 180, price_cents: 760, price_eur: '€7,60' }
 ];
 
 function renderPackages(){

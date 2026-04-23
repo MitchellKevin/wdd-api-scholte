@@ -56,11 +56,11 @@
         <div class="bet-section">
           <label class="bet-label" for="betAmount">Inzet</label>
           <div class="bet-input-row">
+            <button class="chip-btn" data-set="1">1</button>
+            <button class="chip-btn" data-set="3">3</button>
+            <button class="chip-btn" data-set="5">5</button>
             <button class="chip-btn" data-set="10">10</button>
-            <button class="chip-btn" data-set="25">25</button>
-            <button class="chip-btn" data-set="50">50</button>
-            <button class="chip-btn" data-set="100">100</button>
-            <input id="betAmount" type="number" value="50" min="1" />
+            <input id="betAmount" type="number" value="1" min="1" />
           </div>
         </div>
         <div class="action-row">
@@ -75,7 +75,7 @@
 
     <script is:inline type="module" src="/auth-client.js"></script>
     <script is:inline src="/blackjack.js"></script>
-    <script is:inline>
+    <!-- <script is:inline>
       async function navigateAfterSave(href) {
         if (window.pendingSave) await window.pendingSave;
         location.href = href;
@@ -88,6 +88,6 @@
         e.preventDefault();
         navigateAfterSave(e.currentTarget.href);
       });
-    </script>
+    </script> -->
   </body>
 </html>

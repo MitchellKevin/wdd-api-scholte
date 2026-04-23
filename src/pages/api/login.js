@@ -62,7 +62,7 @@ async function givesDailyRewardIfEligible(db, user) {
 
   await db.collection('users').updateOne(
     { _id: user._id },
-    { $inc: { coins_amount: 1000 }, $set: { lastDailyReward: new Date() } }
+    { $inc: { coins_amount: 3 }, $set: { lastDailyReward: new Date() } }
   );
 
   return true;

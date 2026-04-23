@@ -1,47 +1,161 @@
-# Astro Starter Kit: Minimal
+# Blackjack Platform
 
-```sh
-npm create astro@latest -- --template minimal
+Een full-stack multiplayer blackjack applicatie gebouwd met Astro, Node.js en MongoDB. Spelers kunnen accounts aanmaken, coins verdienen, echte betalingen doen via Mollie en realtime tegen elkaar spelen.
+
+---
+
+## Features
+
+- **Multiplayer blackjack** — realtime gameplay via WebSockets (max 4 spelers per tafel)
+- **Authenticatie** — registreren, inloggen en sessies via JWT
+- **EC systeem** — dagelijkse beloningen en EC-Punten kopen via Mollie-betalingen
+- **Leaderboard** — ranglijst van spelers op basis van score
+- **Shop** — EC-Punten kopen met iDEAL/andere betaalmethoden
+- **Responsieve UI** — responsive CSS styling
+
+---
+
+## Tech Stack
+
+| Laag | Technologie |
+|------|------------|
+| Frontend | [Astro](https://astro.build) (SSR) |
+| Backend | Node.js + custom HTTP/WS server |
+| Database | MongoDB |
+| Realtime | WebSocket (`ws`) |
+| Betalingen | [Mollie API](https://docs.mollie.com) |
+| Auth | JWT + bcrypt |
+| Provider | Render |
+
+---
+
+## Vereisten
+
+- Node.js >= 22.12.0
+- MongoDB instantie (lokaal of Atlas)
+- Mollie API key (voor betalingen)
+
+---
+
+## Installatie
+
+```bash
+# Dependencies installeren
+npm install
+
+# Omgevingsvariabelen instellen
+cp .env.example .env
+
+# Development server starten
+npm run dev
+
+# Of de productieserver starten
+npm start
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+---
 
-## 🚀 Project Structure
+## Omgevingsvariabelen
 
-Inside of your Astro project, you'll see the following folders and files:
+Maak een `.env` bestand aan in de root met de volgende variabelen:
 
-```text
+```env
+MONGODB_URI=mongodb://localhost:27017/blackjack
+JWT_SECRET=jouw_geheime_sleutel
+MOLLIE_API_KEY=test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+---
+
+## Scripts
+
+| Commando | Omschrijving |
+|----------|-------------|
+| `npm run dev` | Start de Astro dev server op `localhost:4321` |
+| `npm run build` | Bouwt de productieversie naar `./dist/` |
+| `npm run preview` | Preview van de gebouwde site |
+| `npm start` | Start de Node.js productieserver (`server.mjs`) |
+
+---
+
+## Projectstructuur
+
+```
 /
-├── public/
+├── public/               # Statische assets (CSS, client-side JS)
+│   ├── client.js         # WebSocket client
+│   ├── blackjack.js      # Blackjack spellogica (client)
+│   └── shop.js           # Shop functionaliteit (client)
+├── server/               # Server-side modules
+│   ├── websocket.js      # WebSocket server & berichtenafhandeling
+│   ├── gameManager.js    # Blackjack spellogica (server)
+│   ├── db.js             # Database helperfuncties (coins, scores)
+│   └── mongodb.js        # MongoDB verbinding
 ├── src/
 │   └── pages/
-│       └── index.astro
-└── package.json
+│       ├── index.astro       # Lobby / startpagina
+│       ├── blackjack.astro   # Spelscherm
+│       ├── account.astro     # Accountoverzicht
+│       ├── shop.astro        # Coin shop
+│       ├── leaderboard.astro # Ranglijst
+│       ├── login.astro       # Inloggen
+│       ├── signup.astro      # Registreren
+│       └── api/              # API endpoints
+│           ├── auth/
+│           ├── login.js
+│           ├── signup.js
+│           ├── score.json.js
+│           ├── balance.json.js
+│           ├── daily-reward.js
+│           ├── create-payment.js
+│           └── payment-webhook.json.js
+├── lib/                  # Gedeelde serverlogica (auth, helpers)
+├── server.mjs            # Entrypoint productieserver
+└── astro.config.mjs      # Astro configuratie
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+---
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## API Overzicht
 
-Any static assets, like images, can be placed in the `public/` directory.
+| Methode | Endpoint | Omschrijving |
+|---------|----------|-------------|
+| POST | `/api/signup` | Nieuw account aanmaken |
+| POST | `/api/login` | Inloggen, JWT ontvangen |
+| GET | `/api/me` | Ingelogde gebruikersdata |
+| GET | `/api/balance` | Huidige coin balance |
+| GET | `/api/score.json` | Score opvragen |
+| POST | `/api/daily-reward` | Dagelijkse beloning claimen |
+| POST | `/api/create-payment` | Mollie betaling starten |
+| POST | `/api/payment-webhook` | Mollie betaalstatus verwerken |
+| GET | `/api/leaderboard.json` | Ranglijst opvragen |
 
-## 🧞 Commands
+---
 
-All commands are run from the root of the project, from a terminal:
+## WebSocket Protocol
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+De WebSocket server draait op `/ws`. Berichten zijn JSON-objecten met een `type` veld.
 
-## 👀 Want to learn more?
+**Client → Server**
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+| Type | Omschrijving |
+|------|-------------|
+| `PING` | Verbinding testen |
+| `JOIN_TABLE` | Aan een tafel aanschuiven |
+| `HIT` | Kaart trekken |
+| `STAND` | Passen |
+| `BET` | Inzet plaatsen |
 
+**Server → Client**
+
+| Type | Omschrijving |
+|------|-------------|
+| `WELCOME` | Verbinding bevestigd + client ID |
+| `TABLE_LIST` | Lijst van beschikbare tafels |
+| `GAME_STATE` | Volledige spelstatus |
+| `CARD_DEALT` | Nieuwe kaart gedeeld |
+| `ERROR` | Foutmelding |
+| `PONG` | Ping-antwoord |
 
 Design inspo:
 ![alt text](pokerInspo.png)
@@ -96,9 +210,16 @@ TODO:
 * (Optional) Poker
 
 Feedback
-* Geluid toevoegen, content api
-* Layout netter maken letten op focus op ruimte
-* Multiplayer toevoegen wel belangrijk nog om voor de webAPI en localStorage niet vergeten
-* Focus eerst op het mooi maken daarna op de extra features zoals de database en payment system.
+* Geluid toevoegen, content api[]
+* Layout netter maken letten op focus op ruimte [X]
+* Multiplayer[] toevoegen wel belangrijk nog om voor de webAPI en localStorage niet vergeten[X]
+* Focus eerst op het mooi maken daarna op de extra features zoals de database en payment system.[X]
 * Poker laten zitten
 * Niet te ingewikkeld maken
+
+* Dubbel en split toevoegen
+* Back card cmd icoon met kaarten
+* Leaderbord fixen
+* Database werkend krijgen online
+* Multiplayer (websockets werkend krijgen)
+* Studiepunten ipv coins is leuker voor een CMD casino

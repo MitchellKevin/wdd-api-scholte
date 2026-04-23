@@ -3,9 +3,9 @@ import { getSession, getTokenFromRequest } from '../../../lib/auth.js';
 import { createPayment } from '../../../server/db.js';
 
 const PACKAGES = {
-  p1:  { coins: 1000,  price: '1.00',  label: '1000 coins voor €1' },
-  p5:  { coins: 5000,  price: '5.00',  label: '5000 coins voor €5' },
-  p10: { coins: 10000, price: '10.00', label: '10000 coins voor €10' }
+  p1:  { coins: 60,  price: '2.60',  label: '60 EC-Punten voor €2,60' },
+  p5:  { coins: 120,  price: '5.10',  label: '120 EC-Punten voor €5,10' },
+  p10: { coins: 180, price: '7.60', label: '180 EC-Punten voor €7,60' }
 };
 
 export async function POST({ request }) {

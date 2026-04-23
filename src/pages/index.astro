@@ -131,7 +131,7 @@
         <div class="user-bar">
           Welkom, <strong id="username">–</strong>
           <span class="divider">|</span>
-           <strong id="coins">–</strong>
+           <strong id="EC-Punten">–</strong>
         </div>
         <div id="daily-msg" class="daily-badge" style="display:none"></div>
         <div class="room-form">
@@ -165,10 +165,10 @@
           .then(r => r.ok ? r.json() : Promise.reject())
           .then(d => {
             const usernameEl = document.getElementById('username');
-            const coinsEl = document.getElementById('coins');
+            const ECPointsEl = document.getElementById('EC-Punten');
             const loggedIn = document.getElementById('logged-in');
             if (usernameEl) usernameEl.textContent = d.username;
-            if (coinsEl) coinsEl.textContent = (d.coins_amount ?? 0).toLocaleString('nl-NL');
+            if (ECPointsEl) ECPointsEl.textContent = (d.coins_amount ?? 0).toLocaleString('nl-NL');
             if (loggedIn) loggedIn.style.display = 'block';
           })
           .catch(() => { localStorage.removeItem('token'); location.reload(); });

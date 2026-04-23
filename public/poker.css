@@ -1,4 +1,4 @@
-* {
+/* * {
   box-sizing: border-box;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -45,4 +45,4 @@ body {
 .controls button{ padding:8px 12px;border-radius:8px;border:0;background:#2d8b5b;color:#fff;cursor:pointer }
 .controls button[disabled]{ opacity:0.5; cursor:not-allowed }
 
-@media (max-width:720px){ .poker-stage{ padding:12px } .card{ width:56px;height:78px } }
+@media (max-width:720px){ .poker-stage{ padding:12px } .card{ width:56px;height:78px } } */

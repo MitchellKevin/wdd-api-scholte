@@ -28,7 +28,7 @@ export async function POST({ request }){
 
     if(status === 'paid'){
       if(payment.userId){
-        const mapping = { p1:1000, p5:5000, p10:10000, p20:20000, p50:50000 };
+        const mapping = { p1:60, p5:120, p10:180 };
         const coins = mapping[payment.packageId] || 0;
         await creditCoins(payment.userId, coins);
       }

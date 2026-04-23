@@ -233,8 +233,9 @@ function dealInitial(){
   if(dCards[1]) dCards[1].style.animationDelay = '540ms';
 
   const pval = handValue(player.hand);
+  const dval = handValue(dealer.hand);
   setScore(playerScoreEl, playerBadge, pval, { bj: pval === 21 });
-  if(pval === 21){
+  if(pval === 21, dval === 21){
     finishHand();
   } else {
     hitBtn.disabled = false;
@@ -286,6 +287,10 @@ async function finishHand(){
     outcome = 'Bust — verloren';
     type = 'lose';
     flashCards(playerHandEl, 'lose');
+  }else if(dv === 21 && dealer.hand.length === 2){
+    outcome = 'Dealer blackjack — verloren!';
+    type = 'lose';
+    flashCards(dealerHandEl, 'bj');
   } else if(dv > 21){
     outcome = 'Dealer bust — gewonnen!';
     type = 'win';

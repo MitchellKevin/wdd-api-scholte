@@ -23,7 +23,7 @@ export async function POST({ request }) {
     const result = await db.collection('users').insertOne({
       username,
       password: hash,
-      coins_amount: 1000,
+      coins_amount: 60,
       lastDailyReward: null,
       createdAt: new Date()
     });
