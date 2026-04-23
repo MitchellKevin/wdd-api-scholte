@@ -25,13 +25,13 @@ export async function POST({ request }) {
     const db = await getDB();
     await db.collection('users').updateOne(
       { _id: user._id },
-      { $inc: { coins_amount: 3 }, $set: { lastDailyReward: now } }
+      { $inc: { coins_amount: 1 }, $set: { lastDailyReward: now } }
     );
 
     return new Response(JSON.stringify({
       claimed: true,
-      coinsAdded: 3,
-      message: '+3 coins geclaimd!'
+      coinsAdded: 1,
+      message: '+1 coins geclaimd!'
     }), { status: 200 });
   } catch (e) {
     return new Response(JSON.stringify({ error: e?.message }), { status: 500 });

@@ -226,3 +226,4 @@ Feedback
 * Multiplayer (websockets werkend krijgen) 10U
 * Leaderbord fixen 5M
 * Database werkend krijgen online 30M
+* CRUD toevoegen bij gebruikers
