@@ -1,4 +1,4 @@
-const token = localStorage.getItem('token');
+const token = sessionStorage.getItem('token');
 const proto = location.protocol === 'https:' ? 'wss' : 'ws';
 const socket = new WebSocket(proto + '://'+location.host+'/ws');
 

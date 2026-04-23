@@ -8,7 +8,7 @@ let balance = 0;
 let totalEc = 0;
 
 async function load() {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (!token) { location.href = '/login'; return; }
 
   const [coursesRes, meRes] = await Promise.all([
@@ -120,7 +120,7 @@ function buildCard(course) {
 }
 
 async function buyClick(course, btn) {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   const msg   = document.getElementById('global-msg');
   btn.disabled = true; btn.textContent = 'Bezig…';
   msg.textContent = ''; msg.className = '';

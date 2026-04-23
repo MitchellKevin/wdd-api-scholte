@@ -1,5 +1,5 @@
 async function loadLeaderboard() {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   let myUsername = null;
 
   if (token) {

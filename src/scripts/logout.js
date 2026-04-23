@@ -1,4 +1,4 @@
 document.getElementById('confirmBtn')?.addEventListener('click', () => {
-  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
   location.href = '/login';
 });

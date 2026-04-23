@@ -4,7 +4,7 @@ if (new URLSearchParams(location.search).get('payment') === 'success') {
 
 document.querySelectorAll('[data-pkg]').forEach(btn => {
   btn.addEventListener('click', async () => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     const msg = document.getElementById('msg');
     if (!token) { location.href = '/login'; return; }
     btn.disabled = true; btn.textContent = 'Bezig...';

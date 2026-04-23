@@ -1,5 +1,5 @@
 function loadUser() {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (!token) {
     const notLogged = document.getElementById('not-logged');
     const loggedIn = document.getElementById('logged-in');
@@ -17,7 +17,7 @@ function loadUser() {
       if (ECPointsEl) ECPointsEl.textContent = (d.coins_amount ?? 0).toLocaleString('nl-NL');
       if (loggedIn) loggedIn.style.display = 'block';
     })
-    .catch(() => { localStorage.removeItem('token'); location.reload(); });
+    .catch(() => { sessionStorage.removeItem('token'); location.reload(); });
 }
 
 loadUser();
@@ -33,15 +33,15 @@ window.addEventListener('pageshow', (e) => { if (e.persisted) loadUser(); });
   }
 }
 
-function goToRoom(_host) {
+function goToMultiplayer() {
   const roomInput = document.getElementById('roomInput');
   const msg = document.getElementById('msg');
   const room = roomInput?.value.trim();
   if (!room || !/^\d+$/.test(room)) { msg.textContent = 'Gebruik alleen cijfers voor het kamer-nummer.'; return; }
   msg.textContent = '';
-  location.href = '/blackjack?room=' + encodeURIComponent(room);
+  location.href = '/multiplayer?room=' + encodeURIComponent(room);
 }
 
-document.getElementById('joinBtn')?.addEventListener('click', () => goToRoom(false));
-document.getElementById('hostBtn')?.addEventListener('click', () => goToRoom(true));
-document.getElementById('roomInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') goToRoom(false); });
+document.getElementById('soloBtn')?.addEventListener('click', () => { location.href = '/blackjack'; });
+document.getElementById('multiBtn')?.addEventListener('click', goToMultiplayer);
+document.getElementById('roomInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') goToMultiplayer(); });

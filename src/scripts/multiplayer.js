@@ -1,4 +1,4 @@
-const token = localStorage.getItem('token');
+const token = sessionStorage.getItem('token');
 if (!token) { location.href = '/login'; }
 
 const params = new URLSearchParams(location.search);
@@ -42,7 +42,8 @@ const statusBanner    = document.getElementById('statusBanner');
 const dealerHandEl    = document.getElementById('dealerHand');
 const dealerScoreEl   = document.getElementById('dealerScore');
 const dealerBadge     = document.getElementById('dealerScoreBadge');
-const otherPlayersRow = document.getElementById('otherPlayersRow');
+const otherPlayersLeft  = document.getElementById('otherPlayersLeft');
+const otherPlayersRight = document.getElementById('otherPlayersRight');
 const myHandEl        = document.getElementById('myHand');
 const myScoreEl       = document.getElementById('myScore');
 const myScoreBadge    = document.getElementById('myScoreBadge');
@@ -160,10 +161,11 @@ function renderRoom(msg) {
 }
 
 function renderOtherPlayers(others, currentPlayerIndex, allPlayers, phase) {
-  if (!otherPlayersRow) return;
-  otherPlayersRow.innerHTML = '';
+  if (!otherPlayersLeft || !otherPlayersRight) return;
+  otherPlayersLeft.innerHTML = '';
+  otherPlayersRight.innerHTML = '';
 
-  others.forEach(player => {
+  others.forEach((player, i) => {
     const globalIndex = allPlayers.findIndex(p => p.username === player.username);
     const isCurrentTurn = phase === 'playing' && currentPlayerIndex === globalIndex;
 
@@ -185,13 +187,13 @@ function renderOtherPlayers(others, currentPlayerIndex, allPlayers, phase) {
     `;
 
     const handEl = div.querySelector('.other-hand');
-    player.hand.forEach((card, i) => {
+    player.hand.forEach((card, idx) => {
       const el = makeCardEl(card, false, true);
-      el.style.animationDelay = `${i * 80}ms`;
+      el.style.animationDelay = `${idx * 80}ms`;
       handEl.appendChild(el);
     });
 
-    otherPlayersRow.appendChild(div);
+    (i % 2 === 0 ? otherPlayersLeft : otherPlayersRight).appendChild(div);
   });
 }
 
@@ -221,9 +223,7 @@ function showWaitingControls(msg) {
 
   if (startBtn) startBtn.style.display = isHost ? 'inline-block' : 'none';
   if (waitMsg) {
-    waitMsg.textContent = isHost
-      ? (msg.players.length < 2 ? 'Wacht op meer spelers...' : 'Klaar om te starten!')
-      : 'Wachten op de host...';
+    waitMsg.textContent = isHost ? 'Klaar om te starten!' : 'Wachten op de host...';
   }
 }
 

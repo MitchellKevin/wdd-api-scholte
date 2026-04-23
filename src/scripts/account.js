@@ -1,8 +1,8 @@
 async function loadAccount() {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (!token) { document.getElementById('not-logged').style.display = 'block'; return; }
   const res = await fetch('/api/me', { headers: { Authorization: 'Bearer ' + token }, credentials: 'include' });
-  if (!res.ok) { localStorage.removeItem('token'); document.getElementById('not-logged').style.display = 'block'; return; }
+  if (!res.ok) { sessionStorage.removeItem('token'); document.getElementById('not-logged').style.display = 'block'; return; }
   const me = await res.json();
   document.getElementById('user-name').textContent = me.username;
   document.getElementById('user-coins').textContent = (me.coins_amount ?? 0).toLocaleString('nl-NL');
@@ -12,7 +12,7 @@ async function loadAccount() {
 }
 
 document.getElementById('reward-btn')?.addEventListener('click', async () => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   const msg = document.getElementById('reward-msg');
   try {
     const res = await fetch('/api/daily-reward', { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
@@ -30,7 +30,7 @@ document.getElementById('reward-btn')?.addEventListener('click', async () => {
 });
 
 document.getElementById('logout-btn')?.addEventListener('click', () => {
-  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
   document.cookie = 'session=; Path=/; Max-Age=0';
   location.href = '/login';
 });

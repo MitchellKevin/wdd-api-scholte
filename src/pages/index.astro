@@ -28,10 +28,13 @@ import '../styles/index.css';
            <strong id="EC-Punten">–</strong>
         </div>
         <div id="daily-msg" class="daily-badge" style="display:none"></div>
-        <div class="room-form">
-          <input id="roomInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Kamer-nummer" maxlength="8" />
-          <button class="btn btn-join" id="joinBtn">Join</button>
-          <button class="btn btn-host" id="hostBtn">Host</button>
+        <div class="mode-form">
+          <button class="btn btn-solo" id="soloBtn">Single Player</button>
+          <div class="mode-divider">of</div>
+          <div class="multi-row">
+            <input id="roomInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Kamer-nummer" maxlength="8" />
+            <button class="btn btn-multi" id="multiBtn">Multiplayer</button>
+          </div>
         </div>
         <div id="msg"></div>
       </div>

@@ -15,7 +15,7 @@ async function login() {
     });
     const data = await res.json();
     if (res.ok && data.token) {
-      localStorage.setItem('token', data.token);
+      sessionStorage.setItem('token', data.token);
       if (data.dailyReward) sessionStorage.setItem('dailyReward', 'Dagelijkse beloning: +3 EC-Punten!');
       msg.className = 'ok'; msg.textContent = 'Ingelogd! Je wordt doorgestuurd...';
       setTimeout(() => { location.href = '/'; }, 600);

@@ -83,7 +83,7 @@ export function addPlayer(roomId, clientId, userId, username) {
     return { error: 'Kamer is vol (max 4 spelers)' };
   }
 
-  const gameIsRunning = room.phase !== 'waiting' && room.phase !== 'results';
+  const gameIsRunning = room.phase !== 'waiting' && room.phase !== 'results' && room.phase !== 'betting';
   if (gameIsRunning) {
     return { error: 'Spel is al bezig' };
   }
@@ -100,7 +100,7 @@ export function addPlayer(roomId, clientId, userId, username) {
     username,
     hand: [],
     bet: 0,
-    status: 'waiting',
+    status: room.phase === 'betting' ? 'betting' : 'waiting',
     isHost,
     result: null,
     winAmount: 0

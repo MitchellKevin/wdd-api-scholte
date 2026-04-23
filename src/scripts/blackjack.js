@@ -66,7 +66,7 @@ let splitBet = 0;
 let activeSide = 'main'; // 'main' | 'split'
 
 function getToken(){
-  try { return localStorage.getItem('token'); } catch(e){ return null; }
+  try { return sessionStorage.getItem('token'); } catch(e){ return null; }
 }
 
 async function loadBalance(){
