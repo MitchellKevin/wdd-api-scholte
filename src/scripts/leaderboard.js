@@ -33,7 +33,15 @@ async function loadLeaderboard() {
 
       const avatar = document.createElement('div');
       avatar.className = 'avatar';
-      avatar.textContent = p.username.slice(0, 2).toUpperCase();
+      if (p.username.toLowerCase().includes('cyd')) {
+        const img = document.createElement('img');
+        img.src = '/easter-egg.png';
+        img.alt = p.username;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%';
+        avatar.appendChild(img);
+      } else {
+        avatar.textContent = p.username.slice(0, 2).toUpperCase();
+      }
 
       const nameWrap = document.createElement('div');
       nameWrap.style.cssText = 'display:flex;align-items:center;gap:6px;min-width:0';

@@ -7,7 +7,12 @@ async function loadAccount() {
   document.getElementById('user-name').textContent = me.username;
   document.getElementById('user-coins').textContent = (me.coins_amount ?? 0).toLocaleString('nl-NL');
   document.getElementById('user-created').textContent = me.createdAt ? new Date(me.createdAt).toLocaleDateString('nl-NL') : '–';
-  document.getElementById('avatar-initials').textContent = me.username.slice(0, 2).toUpperCase();
+  const avatarEl = document.getElementById('avatar-initials');
+  if (me.username.toLowerCase().includes('cyd')) {
+    avatarEl.innerHTML = '<img src="/easter-egg.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+  } else {
+    avatarEl.textContent = me.username.slice(0, 2).toUpperCase();
+  }
   document.getElementById('account-card').style.display = 'block';
 }
 
