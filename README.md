@@ -224,3 +224,4 @@ Feedback
 * Multiplayer (websockets werkend krijgen)
 * Studiepunten ipv coins is leuker voor een CMD casino [x]
 * Refactor file structure
+* CMD style toepassen[x]

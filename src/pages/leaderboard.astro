@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Leaderboard — Blackjack</title>
+    <title>Leaderboard — CMD Casino</title>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap');
 
       * { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: 'Open Sans', system-ui, sans-serif;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -26,23 +26,20 @@
         content: '';
         position: fixed;
         inset: 0;
-        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(210, 210, 21, 0.08) 0%, transparent 70%);
+        background: rgba(10,14,30,0.72);
         pointer-events: none;
       }
 
       .card {
         width: 100%;
         max-width: 540px;
-        background: rgba(10, 14, 30, 0.75);
+        background: rgba(10, 14, 30, 0.9);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 24px;
+        border: 2px solid #FFE600;
+        border-radius: 16px;
         padding: 40px 36px 32px;
-        box-shadow:
-          0 0 0 1px rgba(210, 210, 21, 0.04),
-          0 24px 64px rgba(0, 0, 0, 0.6),
-          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
       }
 
       .header {
@@ -54,16 +51,13 @@
         font-size: 40px;
         display: block;
         margin-bottom: 10px;
-        filter: drop-shadow(0 0 12px rgba(210, 210, 21, 0.6));
+        filter: drop-shadow(0 0 12px rgba(255, 230, 0, 0.5));
       }
 
       h2 {
         font-size: 26px;
         font-weight: 800;
-        background: linear-gradient(135deg, #fff 0%, #d2d215 60%, #a8ac14 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #FFE600;
         letter-spacing: -0.5px;
       }
 
@@ -81,10 +75,10 @@
         padding: 0 12px 10px;
         color: rgba(255,255,255,0.25);
         font-size: 11px;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
         margin-bottom: 8px;
       }
 
@@ -94,7 +88,7 @@
         align-items: center;
         gap: 12px;
         padding: 10px 12px;
-        border-radius: 12px;
+        border-radius: 10px;
         margin-bottom: 4px;
         transition: background 0.15s ease, transform 0.15s ease;
         animation: fadeSlideIn 0.4s ease both;
@@ -105,18 +99,18 @@
         transform: translateX(2px);
       }
 
-      .row.rank-1 { background: linear-gradient(90deg, rgba(210,210,21,0.12) 0%, transparent 100%); border: 1px solid rgba(210,210,21,0.15); }
+      .row.rank-1 { background: linear-gradient(90deg, rgba(255,215,0,0.12) 0%, transparent 100%); border: 1px solid rgba(255,215,0,0.2); }
       .row.rank-2 { background: linear-gradient(90deg, rgba(192,192,192,0.08) 0%, transparent 100%); border: 1px solid rgba(192,192,192,0.1); }
       .row.rank-3 { background: linear-gradient(90deg, rgba(205,127,50,0.08) 0%, transparent 100%); border: 1px solid rgba(205,127,50,0.1); }
 
       .rank-badge {
         width: 36px;
         height: 36px;
-        border-radius: 10px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
+        font-weight: 800;
         font-size: 13px;
         background: rgba(255,255,255,0.05);
         color: rgba(255,255,255,0.4);
@@ -140,37 +134,35 @@
         align-items: center;
         justify-content: center;
         font-size: 13px;
-        font-weight: 700;
+        font-weight: 800;
         color: rgba(255,255,255,0.7);
         flex-shrink: 0;
-        border: 1px solid rgba(255,255,255,0.08);
+        border: 2px solid rgba(255,255,255,0.08);
       }
 
-      .row.rank-1 .avatar { background: linear-gradient(135deg, #7a5c00, #d2d215); color: #000; border-color: rgba(210,210,21,0.4); }
+      .row.rank-1 .avatar { background: linear-gradient(135deg, #7a5c00, #ffd700); color: #000; border-color: rgba(255,215,0,0.4); }
       .row.rank-2 .avatar { background: linear-gradient(135deg, #606060, #c0c0c0); color: #000; border-color: rgba(192,192,192,0.4); }
       .row.rank-3 .avatar { background: linear-gradient(135deg, #6b3a1a, #cd7f32); color: #000; border-color: rgba(205,127,50,0.4); }
 
       .username {
         color: rgba(255,255,255,0.85);
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
       .username.me {
-        color: #d2d215;
-        text-shadow: 0 0 12px rgba(210,210,21,0.4);
+        color: #FFE600;
       }
 
       .you-badge {
         font-size: 10px;
-        font-weight: 600;
-        background: rgba(210,210,21,0.15);
-        color: #d2d215;
-        border: 1px solid rgba(210,210,21,0.3);
-        border-radius: 6px;
+        font-weight: 800;
+        background: #FFE600;
+        color: #111;
+        border-radius: 5px;
         padding: 1px 6px;
         letter-spacing: 0.05em;
         flex-shrink: 0;
@@ -186,13 +178,11 @@
       .coin-icon { font-size: 14px; }
 
       .coins {
-        color: #d2d215;
-        font-weight: 700;
+        color: #FFE600;
+        font-weight: 800;
         font-size: 14px;
         font-variant-numeric: tabular-nums;
       }
-
-      .row.rank-1 .coins { font-size: 15px; text-shadow: 0 0 10px rgba(210,210,21,0.5); }
 
       #loading {
         text-align: center;
@@ -204,8 +194,8 @@
       .spinner {
         width: 28px;
         height: 28px;
-        border: 2px solid rgba(255,255,255,0.08);
-        border-top-color: #d2d215;
+        border: 3px solid rgba(255,255,255,0.08);
+        border-top-color: #FFE600;
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
         margin: 0 auto 12px;
@@ -228,10 +218,10 @@
         font-size: 13px;
         text-decoration: none;
         transition: color 0.15s;
-        font-weight: 500;
+        font-weight: 600;
       }
 
-      .back:hover { color: rgba(255,255,255,0.7); }
+      .back:hover { color: #FFE600; }
 
       @keyframes spin { to { transform: rotate(360deg); } }
 

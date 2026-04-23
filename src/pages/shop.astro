@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shop — Blackjack</title>
+    <title>Shop — CMD Casino</title>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap');
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: 'Open Sans', system-ui, sans-serif;
         min-height: 100vh;
-        background-image: url('/bg.png');
+        background-image: url('/cmd-bg.png');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -20,7 +20,7 @@
         content: '';
         position: fixed;
         inset: 0;
-        background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(210,210,21,0.06) 0%, transparent 70%);
+        background: rgba(10,14,30,0.72);
         pointer-events: none;
       }
       header {
@@ -28,8 +28,8 @@
         align-items: center;
         justify-content: space-between;
         padding: 18px 32px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        background: rgba(10,14,30,0.7);
+        border-bottom: 2px solid #FFE600;
+        background: rgba(10,14,30,0.85);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         position: sticky;
@@ -39,19 +39,17 @@
       header h1 {
         font-size: 18px;
         font-weight: 800;
-        background: linear-gradient(135deg, #fff 0%, #d2d215 80%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #FFE600;
+        letter-spacing: -0.3px;
       }
       header a {
-        color: rgba(255,255,255,0.4);
+        color: rgba(255,255,255,0.5);
         text-decoration: none;
         font-size: 13px;
-        font-weight: 500;
+        font-weight: 700;
         transition: color 0.15s;
       }
-      header a:hover { color: rgba(255,255,255,0.8); }
+      header a:hover { color: #FFE600; }
       .page {
         max-width: 700px;
         margin: 0 auto;
@@ -62,22 +60,19 @@
         font-size: 28px;
         font-weight: 800;
         letter-spacing: -0.5px;
-        background: linear-gradient(135deg, #fff 0%, #d2d215 60%, #a8ac14 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #FFE600;
         margin-bottom: 6px;
       }
       .page-header p { color: rgba(255,255,255,0.35); font-size: 14px; }
       .success-banner {
         background: rgba(45,139,91,0.15);
-        border: 1px solid rgba(45,139,91,0.3);
+        border: 2px solid rgba(45,139,91,0.3);
         color: #6bff91;
         padding: 14px 18px;
-        border-radius: 12px;
+        border-radius: 10px;
         margin-bottom: 28px;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -88,46 +83,34 @@
         gap: 16px;
       }
       .pkg {
-        background: rgba(10,14,30,0.7);
+        background: rgba(10,14,30,0.8);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 18px;
+        border: 2px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
         padding: 24px 20px;
         display: flex;
         flex-direction: column;
         gap: 4px;
-        transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        transition: border-color 0.2s, transform 0.2s;
         position: relative;
         overflow: hidden;
       }
-      .pkg::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(210,210,21,0.04) 0%, transparent 60%);
-        pointer-events: none;
-      }
       .pkg:hover {
-        border-color: rgba(210,210,21,0.25);
+        border-color: #FFE600;
         transform: translateY(-3px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(210,210,21,0.1);
       }
-      .pkg-popular {
-        border-color: rgba(210,210,21,0.25);
-        box-shadow: 0 0 0 1px rgba(210,210,21,0.1);
-      }
+      .pkg-popular { border-color: #FFE600; }
       .popular-badge {
         position: absolute;
         top: 12px;
         right: 12px;
-        background: rgba(210,210,21,0.15);
-        border: 1px solid rgba(210,210,21,0.3);
-        color: #d2d215;
+        background: #FFE600;
+        color: #111;
         font-size: 10px;
-        font-weight: 700;
+        font-weight: 800;
         padding: 3px 8px;
-        border-radius: 20px;
+        border-radius: 6px;
         letter-spacing: 0.05em;
         text-transform: uppercase;
       }
@@ -135,8 +118,7 @@
       .pkg .coins {
         font-size: 24px;
         font-weight: 800;
-        color: #d2d215;
-        text-shadow: 0 0 12px rgba(210,210,21,0.3);
+        color: #FFE600;
         line-height: 1;
       }
       .pkg .coins-label {
@@ -153,20 +135,19 @@
       .pkg button {
         width: 100%;
         padding: 11px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #e94560, #c4314f);
-        color: #fff;
+        border-radius: 8px;
+        background: #FFE600;
+        color: #111;
         border: none;
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 800;
         font-family: inherit;
         cursor: pointer;
-        box-shadow: 0 4px 16px rgba(233,69,96,0.25);
         transition: opacity 0.15s, transform 0.1s;
       }
-      .pkg button:hover { opacity: 0.9; transform: translateY(-1px); }
+      .pkg button:hover { opacity: 0.85; transform: translateY(-1px); }
       .pkg button:active { transform: translateY(0); }
-      .pkg button:disabled { background: rgba(255,255,255,0.08); box-shadow: none; cursor: default; transform: none; }
+      .pkg button:disabled { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); cursor: default; transform: none; }
       #msg { margin-top: 20px; font-size: 14px; min-height: 20px; }
       .ok { color: #6bff91; } .err { color: #ff6b6b; }
     </style>
