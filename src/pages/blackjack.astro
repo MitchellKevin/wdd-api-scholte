@@ -1,4 +1,5 @@
 ---
+import '../styles/blackjack.css';
 ---
 <!doctype html>
 <html lang="nl">
@@ -6,7 +7,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Blackjack</title>
-    <link rel="stylesheet" href="/blackjack.css">
   </head>
   <body>
     <main class="bj-stage">
@@ -85,8 +85,8 @@
 
     </main>
 
-    <script is:inline type="module" src="/auth-client.js"></script>
-    <script is:inline src="/blackjack.js"></script>
+    <script src="../scripts/auth-client.js"></script>
+    <script src="../scripts/blackjack.js"></script>
     <!-- <script is:inline>
       async function navigateAfterSave(href) {
         if (window.pendingSave) await window.pendingSave;

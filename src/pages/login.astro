@@ -1,106 +1,12 @@
+---
+import '../styles/login.css';
+---
 <!doctype html>
 <html lang="nl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inloggen — CMD Casino</title>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap');
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body {
-        font-family: 'Open Sans', system-ui, sans-serif;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-        background-image: url('/cmd-bg.png');
-        background-size: cover;
-        background-position: center;
-      }
-      body::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background: rgba(10,14,30,0.72);
-        pointer-events: none;
-      }
-      .card {
-        width: 100%;
-        max-width: 400px;
-        background: rgba(10, 14, 30, 0.9);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 2px solid #FFE600;
-        border-radius: 16px;
-        padding: 40px 36px;
-        box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-        animation: fadeUp 0.4s ease both;
-      }
-      .card-icon { font-size: 36px; text-align: center; display: block; margin-bottom: 10px; }
-      h2 {
-        font-size: 26px;
-        font-weight: 800;
-        text-align: center;
-        margin-bottom: 28px;
-        letter-spacing: -0.5px;
-        color: #FFE600;
-      }
-      label {
-        display: block;
-        color: rgba(255,255,255,0.5);
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 6px;
-      }
-      input {
-        width: 100%;
-        padding: 11px 14px;
-        background: rgba(255,255,255,0.05);
-        border: 2px solid rgba(255,255,255,0.12);
-        border-radius: 8px;
-        color: rgba(255,255,255,0.9);
-        font-size: 15px;
-        font-family: inherit;
-        font-weight: 600;
-        margin-bottom: 20px;
-        transition: border-color 0.15s;
-      }
-      input:focus { outline: none; border-color: #FFE600; }
-      input::placeholder { color: rgba(255,255,255,0.2); }
-      button {
-        width: 100%;
-        padding: 13px;
-        background: #FFE600;
-        border: none;
-        border-radius: 8px;
-        color: #111;
-        font-size: 15px;
-        font-weight: 800;
-        font-family: inherit;
-        cursor: pointer;
-        transition: opacity 0.15s, transform 0.1s;
-      }
-      button:hover { opacity: 0.85; transform: translateY(-1px); }
-      button:active { transform: translateY(0); }
-      button:disabled { opacity: 0.5; cursor: default; transform: none; }
-      #msg { margin-top: 14px; text-align: center; font-size: 14px; min-height: 20px; }
-      .err { color: #ff6b6b; } .ok { color: #6bff91; }
-      .footer-link {
-        text-align: center;
-        margin-top: 22px;
-        color: rgba(255,255,255,0.3);
-        font-size: 13px;
-      }
-      .footer-link a { color: #FFE600; text-decoration: none; font-weight: 700; }
-      .footer-link a:hover { text-decoration: underline; }
-      @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(16px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-    </style>
   </head>
   <body>
     <div class="card">
@@ -114,38 +20,6 @@
       <p id="msg"></p>
       <div class="footer-link">Nog geen account? <a href="/signup">Registreren</a></div>
     </div>
-    <script>
-      const btn = document.getElementById('btn') as HTMLButtonElement | null;
-      const msg = document.getElementById('msg') as HTMLElement | null;
-      async function login() {
-        if (!btn || !msg) return;
-        btn.disabled = true; btn.textContent = 'Bezig...';
-        msg.textContent = ''; msg.className = '';
-        const username = (document.getElementById('username') as HTMLInputElement).value.trim();
-        const password = (document.getElementById('password') as HTMLInputElement).value;
-        try {
-          const res = await fetch('/api/login', {
-            method: 'POST', credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-          });
-          const data = await res.json();
-          if (res.ok && data.token) {
-            localStorage.setItem('token', data.token);
-            if (data.dailyReward) sessionStorage.setItem('dailyReward', 'Dagelijkse beloning: +3 EC-Punten!');
-            msg.className = 'ok'; msg.textContent = 'Ingelogd! Je wordt doorgestuurd...';
-            setTimeout(() => { location.href = '/'; }, 600);
-          } else {
-            msg.className = 'err'; msg.textContent = data.message || 'Inloggen mislukt';
-          }
-        } catch {
-          msg.className = 'err'; msg.textContent = 'Netwerkfout, probeer opnieuw';
-        } finally {
-          btn.disabled = false; btn.textContent = 'Inloggen';
-        }
-      }
-      btn?.addEventListener('click', login);
-      document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
-    </script>
+    <script src="../scripts/login.js"></script>
   </body>
 </html>
