@@ -1,4 +1,4 @@
-# Blackjack Platform
+# CMD Casino
 
 Een full-stack multiplayer blackjack applicatie gebouwd met Astro, Node.js en MongoDB. Spelers kunnen accounts aanmaken, coins verdienen, echte betalingen doen via Mollie en realtime tegen elkaar spelen.
 
