@@ -227,3 +227,11 @@ Feedback
 * Leaderbord fixen 5M [x]
 * Database werkend krijgen online 30M
 * CRUD toevoegen bij gebruikers
+
+Feedback:
+* Background bij spelen is bit much
+* Mist een content api, (dit wordt nu een ElevenLabs API voor dealer voice). Verder nog sounds voor 
+Card deal sounds, Chip stack clicks, Win / blackjack stingers, Bust sound, Background lounge music, 
+Mute / volume sliders, Smooth fade transitions met web native
+* Duidelijker maken wie aan de beurt is bij multiplayer
+* Favicon toevoegen
