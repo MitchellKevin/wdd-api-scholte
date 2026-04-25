@@ -308,7 +308,7 @@
     const btn = document.getElementById('muteBtn');
     if (!btn) return;
     function refresh() {
-      btn.textContent = muted ? '🔇' : '🔊';
+      btn.innerHTML = muted ? '<img src="/mute.svg" alt="mute">' : '<img src="/sound.svg" alt="sound">';
       btn.setAttribute('aria-pressed', String(muted));
     }
     refresh();
