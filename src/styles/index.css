@@ -196,6 +196,10 @@ h1 {
 .btn-roulette { background: transparent; color: #FFE600; border: 2px solid #FFE600 !important; width: 100%; }
 .btn-roulette:hover { background: rgba(255,230,0,0.1); }
 .btn-multi { background: rgba(255,255,255,0.06); color: #fff; border: 2px solid rgba(255,255,255,0.15) !important; width: 100%; }
+.btn-poker { background: rgba(107,255,145,0.07); color: #6bff91; border: 2px solid rgba(107,255,145,0.25) !important; width: 100%; }
+.btn-poker:hover { background: rgba(107,255,145,0.14); }
+.btn-row { display: flex; gap: 10px; width: 100%; }
+.btn-row .btn { flex: 1; }
 .not-logged {
   text-align: center;
   padding: 80px 24px;

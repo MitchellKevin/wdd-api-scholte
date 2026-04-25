@@ -42,7 +42,17 @@ function goToMultiplayer() {
   location.href = '/multiplayer?room=' + encodeURIComponent(room);
 }
 
+function goToPoker() {
+  const roomInput = document.getElementById('roomInput');
+  const msg = document.getElementById('msg');
+  const room = roomInput?.value.trim();
+  if (!room || !/^\d+$/.test(room)) { msg.textContent = 'Gebruik alleen cijfers voor het kamer-nummer.'; return; }
+  msg.textContent = '';
+  location.href = '/poker?room=' + encodeURIComponent(room);
+}
+
 document.getElementById('soloBtn')?.addEventListener('click', () => { location.href = '/blackjack'; });
 document.getElementById('rouletteBtn')?.addEventListener('click', () => { location.href = '/roulette'; });
 document.getElementById('multiBtn')?.addEventListener('click', goToMultiplayer);
+document.getElementById('pokerBtn')?.addEventListener('click', goToPoker);
 document.getElementById('roomInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') goToMultiplayer(); });

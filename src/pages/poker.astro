@@ -1,0 +1,117 @@
+---
+import '../styles/blackjack.css';
+import '../styles/multiplayer.css';
+import '../styles/poker.css';
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Multiplayer Poker</title>
+  </head>
+  <body>
+    <main class="bj-stage">
+
+      <header class="bj-header">
+        <div class="header-left">
+          <a href="/" class="back-link">← Lobby</a>
+        </div>
+        <div class="header-center">
+          <span class="room-badge">Tafel <strong id="roomDisplay">–</strong></span>
+          <span class="bank-display"><strong id="bank">–</strong></span>
+        </div>
+        <div class="header-right">
+          <button id="muteBtn" class="mute-btn" aria-pressed="false" title="Geluid aan/uit">🔊</button>
+          <a href="/account" class="account-link">Account</a>
+        </div>
+      </header>
+
+      <div id="statusBanner" class="status-banner">Verbinden...</div>
+
+      <div class="mp-table">
+
+        <!-- Community cards zone -->
+        <div class="zone community-zone">
+          <div class="zone-label">Community Cards</div>
+          <div id="communityCards" class="community-hand"></div>
+          <div class="table-info">
+            <span class="pot-display">Pot: <strong id="potAmount">0</strong> EC</span>
+            <span class="bet-display">Bod: <strong id="currentBetAmount">0</strong> EC</span>
+          </div>
+        </div>
+
+        <!-- Other players: left and right sides -->
+        <div id="otherPlayersLeft"  class="other-players-side side-left"></div>
+        <div id="otherPlayersRight" class="other-players-side side-right"></div>
+
+        <!-- My hole cards -->
+        <div class="zone player-zone" id="myZone">
+          <div id="myHand" class="hand"></div>
+          <div id="myHandName" class="hand-name-badge" style="display:none"></div>
+          <div class="zone-label" id="myLabel">Jij</div>
+        </div>
+
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-panel">
+
+        <!-- Waiting phase -->
+        <div id="ctrlWaiting" class="ctrl-section" style="display:none">
+          <div id="playerList" class="player-list"></div>
+          <p id="waitMsg" class="wait-msg"></p>
+          <button id="startBtn" class="btn-action btn-deal" style="display:none">Start Spel</button>
+        </div>
+
+        <!-- Antes phase -->
+        <div id="ctrlAntes" class="ctrl-section" style="display:none">
+          <div class="bet-section">
+            <label class="bet-label" for="anteAmount">Inzet</label>
+            <div class="bet-input-row">
+              <button class="chip-btn ante-chip" data-set="1">1</button>
+              <button class="chip-btn ante-chip" data-set="5">5</button>
+              <button class="chip-btn ante-chip" data-set="10">10</button>
+              <button class="chip-btn ante-chip" data-set="25">25</button>
+              <input id="anteAmount" type="number" value="1" min="1" />
+            </div>
+          </div>
+          <div class="action-row">
+            <button id="anteBtn" class="btn-action btn-deal">Inzet Plaatsen</button>
+          </div>
+          <p id="anteWaitMsg" class="wait-msg"></p>
+        </div>
+
+        <!-- Playing phase (preflop / flop / turn / river) -->
+        <div id="ctrlPlaying" class="ctrl-section" style="display:none">
+          <div class="bet-section">
+            <label class="bet-label" for="raiseAmount">Raise met</label>
+            <div class="bet-input-row">
+              <input id="raiseAmount" type="number" value="1" min="1" />
+              <span class="bet-label">EC</span>
+            </div>
+          </div>
+          <div class="action-row">
+            <button id="foldBtn"      class="btn-action btn-fold"  disabled>Fold</button>
+            <button id="checkCallBtn" class="btn-action btn-check" disabled>Check</button>
+            <button id="raiseBtn"     class="btn-action btn-raise" disabled>Raise</button>
+          </div>
+          <p id="turnMsg" class="wait-msg"></p>
+        </div>
+
+        <!-- Results phase -->
+        <div id="ctrlResults" class="ctrl-section" style="display:none">
+          <div id="resultMsg" class="outcome-msg visible push">–</div>
+          <button id="playAgainBtn" class="btn-action btn-deal" style="display:none">Opnieuw Spelen</button>
+        </div>
+
+        <div id="errorMsg" class="error-msg" style="display:none"></div>
+
+      </div>
+
+    </main>
+
+    <script src="../scripts/sound.js"></script>
+    <script src="../scripts/poker.js"></script>
+  </body>
+</html>
