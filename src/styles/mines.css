@@ -1,0 +1,190 @@
+/* ─── Game title badge ────────────────────────────────────────────────────── */
+.game-title-badge {
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFE600;
+  letter-spacing: 0.06em;
+  margin-right: 10px;
+}
+
+/* ─── Multiplier bar ──────────────────────────────────────────────────────── */
+.multiplier-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 28px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.mult-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.mult-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: #FFE600;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.mult-preview {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ─── Grid area ───────────────────────────────────────────────────────────── */
+.mines-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.mines-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  width: min(440px, 92vw);
+}
+
+/* ─── Tiles ───────────────────────────────────────────────────────────────── */
+.mine-tile {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: rgba(20, 26, 48, 0.92);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.14s, border-color 0.14s, transform 0.1s;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.mine-tile:not(:disabled):hover {
+  background: rgba(255, 230, 0, 0.08);
+  border-color: rgba(255, 230, 0, 0.4);
+  transform: scale(1.06);
+}
+
+.mine-tile:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.mine-tile:disabled:not(.gem):not(.mine-hit):not(.mine-dim) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Safe tile — gem */
+.mine-tile.gem {
+  background: rgb(0, 102, 25);
+  border-color: rgba(0, 124, 31, 0.8);
+  animation: gemReveal 0.36s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  cursor: default;
+}
+
+/* Mine tile — player hit it */
+.mine-tile.mine-hit {
+  background: rgb(174, 0, 0);
+  border-color: rgba(129, 0, 0, 0.9);
+  animation: mineExplode 0.35s ease both;
+  cursor: default;
+}
+
+/* Mine tile — revealed after cashout / loss (not the hit one) */
+.mine-tile.mine-dim {
+  background: rgb(174, 0, 0);
+  border-color: rgba(129, 0, 0, 0.9);
+  cursor: default;
+}
+
+@keyframes gemReveal {
+  from { opacity: 0; transform: scale(0.45) rotate(-12deg); }
+  to   { opacity: 1; transform: scale(1)    rotate(0deg);   }
+}
+
+@keyframes mineExplode {
+  0%   { transform: scale(1);   }
+  25%  { transform: scale(1.22); }
+  60%  { transform: scale(0.88); }
+  100% { transform: scale(1);   }
+}
+
+/* ─── Controls ────────────────────────────────────────────────────────────── */
+.setup-row {
+  display: flex;
+  gap: 28px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mines-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mines-select-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mine-btn {
+  padding: 5px 11px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+
+.mine-btn:hover,
+.mine-btn.active {
+  background: rgba(255, 107, 107, 0.14);
+  border-color: rgba(255, 107, 107, 0.5);
+  color: #ff6b6b;
+}
+
+/* Cashout button */
+.btn-cashout {
+  background: #6bff91;
+  color: #111;
+  box-shadow: 0 4px 16px rgba(107, 255, 145, 0.3);
+  font-size: 15px;
+  padding: 12px 32px;
+}
+
+.btn-cashout:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .mines-grid { gap: 6px; }
+  .mine-tile  { font-size: 20px; border-radius: 8px; }
+  .mult-value { font-size: 24px; }
+  .setup-row  { gap: 16px; }
+}

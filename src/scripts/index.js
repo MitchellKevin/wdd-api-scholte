@@ -51,8 +51,9 @@ function goToPoker() {
   location.href = '/poker?room=' + encodeURIComponent(room);
 }
 
-document.getElementById('soloBtn')?.addEventListener('click', () => { location.href = '/blackjack'; });
+document.getElementById('soloBtn')?.addEventListener('click',    () => { location.href = '/blackjack'; });
 document.getElementById('rouletteBtn')?.addEventListener('click', () => { location.href = '/roulette'; });
+document.getElementById('minesBtn')?.addEventListener('click',    () => { location.href = '/mines'; });
 document.getElementById('multiBtn')?.addEventListener('click', goToMultiplayer);
 document.getElementById('pokerBtn')?.addEventListener('click', goToPoker);
 document.getElementById('roomInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') goToMultiplayer(); });
