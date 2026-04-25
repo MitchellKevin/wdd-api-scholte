@@ -21,7 +21,9 @@ function makeCardEl(card, hidden = false, small = false) {
 }
 
 function renderHand(container, cards, hasHiddenCard = false, small = false) {
+  const oldCount = parseInt(container.dataset.soundCount || '0', 10);
   container.innerHTML = '';
+  container.dataset.soundCount = cards.length;
   cards.forEach((card, i) => {
     const el = makeCardEl(card, false, small);
     el.style.animationDelay = `${i * 100}ms`;
@@ -31,6 +33,12 @@ function renderHand(container, cards, hasHiddenCard = false, small = false) {
     const el = makeCardEl(null, true, small);
     el.style.animationDelay = `${cards.length * 100}ms`;
     container.appendChild(el);
+  }
+  // Play card sound only for newly added cards
+  if (window.Sound && cards.length > oldCount) {
+    for (let i = oldCount; i < cards.length; i++) {
+      setTimeout(() => Sound.playCard(), (i - oldCount) * 110);
+    }
   }
 }
 
@@ -90,6 +98,8 @@ const ws = new WebSocket(`${proto}://${location.host}`);
 
 let myUsername = null;
 let isHost = false;
+let _lastPhase  = null;
+let _lastResult = null;
 
 ws.addEventListener('open', () => {
   if (statusBanner) statusBanner.textContent = 'Verbonden — kamer laden...';
@@ -132,6 +142,22 @@ function renderRoom(msg) {
   const myPlayer = msg.players.find(p => p.username === myUsername);
   const others   = msg.players.filter(p => p.username !== myUsername);
   isHost = myPlayer?.isHost ?? false;
+
+  // Phase-transition sounds
+  if (window.Sound) {
+    if (msg.phase !== _lastPhase) {
+      if (msg.phase === 'betting') Sound.say.placeBets();
+      else if (msg.phase === 'dealer') Sound.say.noMoreBets();
+      _lastPhase = msg.phase;
+    }
+    if (msg.phase === 'results' && myPlayer?.result && myPlayer.result !== _lastResult) {
+      _lastResult = myPlayer.result;
+      if (myPlayer.result === 'win')       { Sound.playWin();  Sound.say.playerWins(); }
+      else if (myPlayer.result === 'lose') { Sound.playLose(); Sound.say.dealerWins(); }
+      else                                 { Sound.say.push(); }
+    }
+    if (msg.phase !== 'results') _lastResult = null;
+  }
 
   // Dealer
   renderHand(dealerHandEl, msg.dealer.hand, msg.dealer.hasHiddenCard);
@@ -295,11 +321,13 @@ playAgainBtn?.addEventListener('click',() => send({ type: 'PLAY_AGAIN' }));
 betBtn?.addEventListener('click', () => {
   const amount = parseInt(betAmountEl?.value, 10);
   if (!amount || amount < 1) { showError('Ongeldige inzet'); return; }
+  if (window.Sound) Sound.playChip();
   send({ type: 'PLACE_BET', amount });
 });
 
 document.querySelectorAll('.chip-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (betAmountEl) betAmountEl.value = btn.dataset.set;
+    if (window.Sound) Sound.playChip();
   });
 });

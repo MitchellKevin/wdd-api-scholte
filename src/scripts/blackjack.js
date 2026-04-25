@@ -56,6 +56,7 @@ let dealer = { hand: [] };
 let player = { hand: [] };
 let bank = 0;
 let bet = 50;
+let originalBet = 50;
 let pendingSave = null;
 let holeRevealed = false;
 
@@ -194,12 +195,19 @@ function setScore(el, badge, value, opts = {}){
   else if(opts.good) badge.classList.add('good');
 }
 
-function showOutcome(text, type = 'push'){
+function showOutcome(text, type = 'push', voiceFn = null){
   if(!messageEl) return;
   messageEl.className = 'outcome-msg ' + type;
   messageEl.textContent = text;
   void messageEl.offsetWidth;
   messageEl.classList.add('visible');
+
+  if(window.Sound){
+    if(type === 'bj')        { Sound.playWin();  Sound.say.blackjack(); }
+    else if(type === 'win')  { Sound.playWin();  (voiceFn || Sound.say.playerWins)(); }
+    else if(type === 'lose') { Sound.playLose(); (voiceFn || Sound.say.dealerWins)(); }
+    else                     { Sound.say.push(); }
+  }
 }
 
 function hideOutcome(){
@@ -271,8 +279,11 @@ function resetTable(){
 
 function dealInitial(){
   bet = Math.max(1, Math.min(bank, Number(betInput.value) || 1));
+  originalBet = bet;
   bank -= bet;
   bankEl.textContent = bank.toLocaleString('nl-NL');
+
+  if(window.Sound){ Sound.playChip(); Sound.playStartTone(); }
 
   player.hand.push(deck.pop());
   dealer.hand.push(deck.pop());
@@ -280,6 +291,18 @@ function dealInitial(){
   dealer.hand.push(deck.pop());
 
   renderHands(true);
+
+  // Card deal sounds matching the animation delays (0, 180, 360, 540 ms)
+  if(window.Sound){
+    Sound.playCard();
+    setTimeout(() => Sound.playCard(), 180);
+    setTimeout(() => Sound.playCard(), 360);
+    setTimeout(() => Sound.playCard(), 540);
+    setTimeout(() => {
+      if(dealer.hand[1] && dealer.hand[1].rank === 'A') Sound.say.dealerAce();
+      else Sound.say.goodLuck();
+    }, 900);
+  }
 
   const pCards = playerHandEl.querySelectorAll('.card');
   const dCards = dealerHandEl.querySelectorAll('.card');
@@ -299,6 +322,12 @@ function dealInitial(){
 
 function playerHit(){
   const activeHand = activeSide === 'main' ? player.hand : splitHandArr;
+  const valBefore = handValue(activeHand);
+  if(window.Sound){
+    Sound.playCard();
+    if(valBefore >= 20)      setTimeout(() => Sound.say.boldMove(), 150);
+    else if(valBefore >= 18) setTimeout(() => Sound.say.interesting(), 150);
+  }
   activeHand.push(deck.pop());
 
   if(activeSide === 'main'){
@@ -315,6 +344,7 @@ function playerHit(){
 }
 
 function doDouble(){
+  if(window.Sound){ Sound.playChip(); Sound.say.doubling(); setTimeout(() => Sound.playCard(), 150); }
   const activeBetAmt = activeSide === 'main' ? bet : splitBet;
   bank -= activeBetAmt;
   if(activeSide === 'main') bet *= 2; else splitBet *= 2;
@@ -336,6 +366,7 @@ function doDouble(){
 }
 
 function doSplit(){
+  if(window.Sound){ Sound.playChip(); Sound.say.split(); setTimeout(() => Sound.playCard(), 100); setTimeout(() => Sound.playCard(), 300); }
   const secondCard = player.hand.pop();
   splitHandArr = [secondCard];
   splitBet = bet;
@@ -365,6 +396,7 @@ function doSplit(){
 }
 
 async function dealerPlay(){
+  if(window.Sound) Sound.playSwoosh();
   renderHands(false);
   let dv = handValue(dealer.hand);
   setScore(dealerScoreEl, dealerBadge, dv);
@@ -376,6 +408,7 @@ async function dealerPlay(){
     if(!card) break;
     dealer.hand.push(card);
     dv = handValue(dealer.hand);
+    if(window.Sound) Sound.playCard();
     renderHands(false);
     setScore(dealerScoreEl, dealerBadge, dv, { bust: dv > 21 });
     await delay(420);
@@ -451,14 +484,30 @@ async function finishSplitAndDealer(){
     const totalReturn = r1.payout + r2.payout;
     const totalStake  = bet + splitBet;
     const overallType = totalReturn > totalStake ? 'win' : totalReturn === totalStake ? 'push' : 'lose';
-    showOutcome(combinedOutcome, overallType);
+    if(overallType === 'win' && window.Sound) Sound.playCashRegister();
+    let splitVoiceFn = null;
+    if(window.Sound){
+      if(bank === 0 && overallType === 'lose')          splitVoiceFn = Sound.say.houseWins;
+      else if(totalReturn >= originalBet * 4)           splitVoiceFn = Sound.say.bigWinner;
+      else if(dv > 21 && overallType === 'win')         splitVoiceFn = Sound.say.dealerBust;
+    }
+    showOutcome(combinedOutcome, overallType, splitVoiceFn);
   } else {
     const pv = handValue(player.hand);
     setScore(playerScoreEl, playerBadge, pv, { bust: pv > 21, bj: pv === 21 && player.hand.length === 2 });
 
     const r = resolveHand(pv, dv, player.hand.length, playerHandEl, bet, true);
     bank += r.payout;
-    showOutcome(r.outcome, r.type);
+    if(r.type === 'win' && window.Sound) Sound.playCashRegister();
+    let voiceFn = null;
+    if(window.Sound){
+      if(bank === 0 && r.type === 'lose')               voiceFn = Sound.say.houseWins;
+      else if(pv > 21 && r.type === 'lose')             voiceFn = Sound.say.bust;
+      else if(r.payout >= originalBet * 3 && r.type === 'win') voiceFn = Sound.say.bigWinner;
+      else if(dv > 21 && r.type === 'win')              voiceFn = Sound.say.dealerBust;
+      else if(pv === 21 && player.hand.length > 2 && r.type === 'win') voiceFn = Sound.say.twentyOne;
+    }
+    showOutcome(r.outcome, r.type, voiceFn);
   }
 
   bankEl.textContent = bank.toLocaleString('nl-NL');
@@ -495,6 +544,7 @@ async function finishHand(){
 document.querySelectorAll('.chip-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if(betInput) betInput.value = btn.dataset.set;
+    if(window.Sound) Sound.playChip();
   });
 });
 
@@ -502,9 +552,9 @@ document.querySelectorAll('.chip-btn').forEach(btn => {
 resetTable();
 loadBalance().catch(() => {});
 
-if(dealBtn)   dealBtn.addEventListener('click',  () => { resetTable(); dealInitial(); });
+if(dealBtn)   dealBtn.addEventListener('click',  () => { if(window.Sound) Sound.playShuffle(); resetTable(); dealInitial(); });
 if(hitBtn)    hitBtn.addEventListener('click',   () => { playerHit(); });
-if(standBtn)  standBtn.addEventListener('click', () => { finishHand(); });
+if(standBtn)  standBtn.addEventListener('click', () => { if(window.Sound) Sound.say.standing(); finishHand(); });
 if(doubleBtn) doubleBtn.addEventListener('click',() => { doDouble(); });
 if(splitBtn)  splitBtn.addEventListener('click', () => { doSplit(); });
-if(newBtn)    newBtn.addEventListener('click',   () => { resetTable(); });
+if(newBtn)    newBtn.addEventListener('click',   () => { if(window.Sound){ Sound.playShuffle(); setTimeout(() => Sound.say.shuffleUp(), 300); } resetTable(); });

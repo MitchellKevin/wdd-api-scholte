@@ -19,6 +19,7 @@ import '../styles/blackjack.css';
           <span class="bank-display"><strong id="bank">–</strong></span>
         </div>
         <div class="header-right">
+          <button id="muteBtn" class="mute-btn" aria-pressed="false" title="Geluid aan/uit"><img src="/sound.svg" alt="sound"></button>
           <a href="/account" class="account-link">Account</a>
         </div>
       </header>
@@ -86,6 +87,7 @@ import '../styles/blackjack.css';
     </main>
 
     <script src="../scripts/auth-client.js"></script>
+    <script src="../scripts/sound.js"></script>
     <script src="../scripts/blackjack.js"></script>
     <!-- <script is:inline>
       async function navigateAfterSave(href) {
