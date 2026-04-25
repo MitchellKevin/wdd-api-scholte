@@ -46,6 +46,22 @@ body {
 }
 .back-link:hover, .account-link:hover { color: #000000; border-color: #FFE600; background-color: #FFE600;}
 
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.mute-btn {
+  background: transparent;
+  border: 2px solid #FFE600;
+  border-radius: 6px;
+  color: #FFE600;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 10px;
+  transition: background 0.15s, color 0.15s;
+}
+.mute-btn:hover { background: #FFE600; }
+.mute-btn[aria-pressed="true"] { border-color: rgba(255,230,0,0.4); color: rgba(255,230,0,0.45); }
+
 .bank-display {
   font-size: 15px;
   font-weight: 800;
