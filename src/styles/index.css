@@ -193,6 +193,8 @@ h1 {
 .btn:hover { opacity: 0.85; transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
 .btn-solo { background: #FFE600; color: #111; width: 100%; }
+.btn-roulette { background: transparent; color: #FFE600; border: 2px solid #FFE600 !important; width: 100%; }
+.btn-roulette:hover { background: rgba(255,230,0,0.1); }
 .btn-multi { background: rgba(255,255,255,0.06); color: #fff; border: 2px solid rgba(255,255,255,0.15) !important; width: 100%; }
 .not-logged {
   text-align: center;

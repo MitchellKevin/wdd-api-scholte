@@ -43,5 +43,6 @@ function goToMultiplayer() {
 }
 
 document.getElementById('soloBtn')?.addEventListener('click', () => { location.href = '/blackjack'; });
+document.getElementById('rouletteBtn')?.addEventListener('click', () => { location.href = '/roulette'; });
 document.getElementById('multiBtn')?.addEventListener('click', goToMultiplayer);
 document.getElementById('roomInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') goToMultiplayer(); });

@@ -1,0 +1,113 @@
+---
+import '../styles/roulette.css';
+const red = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+function cls(n: number): string {
+  if (n === 0) return 'green-num';
+  return red.has(n) ? 'red-num' : 'black-num';
+}
+const row3 = Array.from({length: 12}, (_, i) => (i + 1) * 3);
+const row2 = Array.from({length: 12}, (_, i) => (i + 1) * 3 - 1);
+const row1 = Array.from({length: 12}, (_, i) => (i + 1) * 3 - 2);
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Roulette</title>
+  </head>
+  <body>
+    <main class="rl-stage">
+
+      <header class="rl-header">
+        <div class="header-left">
+          <a href="/" class="back-link">← Lobby</a>
+        </div>
+        <div class="header-center">
+          <span class="bank-display"><strong id="bank">–</strong></span>
+        </div>
+        <div class="header-right">
+          <button id="muteBtn" class="mute-btn" aria-pressed="false" title="Geluid aan/uit">🔊</button>
+          <a href="/account" class="account-link">Account</a>
+        </div>
+      </header>
+
+      <div class="rl-body">
+
+        <!-- Wheel -->
+        <div class="wheel-section">
+          <div class="wheel-wrap">
+            <div class="wheel-pointer">▼</div>
+            <canvas id="wheelCanvas" width="280" height="280"></canvas>
+          </div>
+          <div id="resultDisplay" class="result-display" style="visibility:hidden">
+            <span id="resultNum" class="result-num">0</span>
+          </div>
+          <div id="message" class="outcome-msg"></div>
+        </div>
+
+        <!-- Betting Table -->
+        <div class="bet-table">
+
+          <div class="numbers-area">
+            <button class="num-cell green-num num-zero" data-bet="straight-0">0</button>
+            <div class="nums-grid">
+              <div class="nums-row">
+                {row3.map(n => <button class={`num-cell ${cls(n)}`} data-bet={`straight-${n}`}>{n}</button>)}
+              </div>
+              <div class="nums-row">
+                {row2.map(n => <button class={`num-cell ${cls(n)}`} data-bet={`straight-${n}`}>{n}</button>)}
+              </div>
+              <div class="nums-row">
+                {row1.map(n => <button class={`num-cell ${cls(n)}`} data-bet={`straight-${n}`}>{n}</button>)}
+              </div>
+            </div>
+          </div>
+
+          <div class="outside-row">
+            <button class="outside-btn" data-bet="dozen-1">1st 12</button>
+            <button class="outside-btn" data-bet="dozen-2">2nd 12</button>
+            <button class="outside-btn" data-bet="dozen-3">3rd 12</button>
+          </div>
+
+          <div class="outside-row">
+            <button class="outside-btn" data-bet="low">1–18</button>
+            <button class="outside-btn" data-bet="even">Even</button>
+            <button class="outside-btn outside-red" data-bet="red">Rood</button>
+            <button class="outside-btn outside-black" data-bet="black">Zwart</button>
+            <button class="outside-btn" data-bet="odd">Oneven</button>
+            <button class="outside-btn" data-bet="high">19–36</button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-panel">
+        <div class="bet-section">
+          <label class="bet-label">Inzet per klik</label>
+          <div class="bet-input-row">
+            <button class="chip-btn" data-set="1">1</button>
+            <button class="chip-btn" data-set="3">3</button>
+            <button class="chip-btn" data-set="5">5</button>
+            <button class="chip-btn" data-set="10">10</button>
+            <input id="chipAmount" type="number" value="1" min="1" />
+          </div>
+        </div>
+        <div class="action-row">
+          <button id="clearBtn" class="btn-action btn-clear">Wis alles</button>
+          <button id="spinBtn" class="btn-action btn-spin">Spin ↺</button>
+        </div>
+        <div class="total-bet-row">
+          Ingezet: <strong id="totalBetDisplay">0</strong>
+        </div>
+      </div>
+
+    </main>
+
+    <script src="../scripts/auth-client.js"></script>
+    <script src="../scripts/sound.js"></script>
+    <script src="../scripts/roulette.js"></script>
+  </body>
+</html>
