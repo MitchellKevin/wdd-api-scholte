@@ -190,16 +190,15 @@ h1 {
   transition: opacity 0.15s, transform 0.1s;
   white-space: nowrap;
 }
-.btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn:hover { opacity: 0.85; transform: translateY(-1px); rotate: 5deg; background-color: #FFE600; border-color: #FFE600; color: black;}
 .btn:active { transform: translateY(0); }
 .btn-solo { background: transparent; color: #FFE600; border: 2px solid #FFE600 !important; width: 100%;  }
 .btn-roulette { background: transparent; color: #FFE600; border: 2px solid #FFE600 !important; width: 100%; }
-.btn-roulette:hover { background: transparent; color: #FFE600; border: 2px solid #FFE600 !important; width: 100%; }
+.btn-roulette:hover { opacity: 0.85; transform: translateY(-1px); rotate: -5deg; background-color: #FFE600; border-color: #FFE600; color: black; }
 .btn-mines { background: transparent; color: #FFE600; border: 2px solid #FFE600 !important; width: 100%; }
-.btn-mines:hover { opacity: 0.85; }
+.btn-mines:hover { opacity: 0.85; rotate: 5deg;}
 .btn-multi { background: rgba(255,255,255,0.06); color: #fff; border: 2px solid rgba(255,255,255,0.15) !important; width: 100%; }
 .btn-poker { background: rgba(255,255,255,0.06); color: #fff; border: 2px solid rgba(255,255,255,0.15) !important; width: 100%;  }
-.btn-poker:hover { background: rgba(107,255,145,0.14); }
 .btn-row { display: flex; gap: 10px; width: 100%; }
 .btn-row .btn { flex: 1; }
 .not-logged {

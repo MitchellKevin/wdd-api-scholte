@@ -4,7 +4,7 @@
 
 body {
   font-family: 'Open Sans', system-ui, sans-serif;
-  background-image: url('/cmd-bg.png');
+  background-image: url('/bgBW.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

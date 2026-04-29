@@ -19,17 +19,23 @@ export async function POST({ request }) {
     if (!pkg) return new Response(JSON.stringify({ error: 'Ongeldig pakket' }), { status: 400 });
 
     const mollie = createMollieClient({ apiKey: import.meta.env.MOLLIE_API_KEY });
-    const baseUrl = import.meta.env.SITE_URL || 'http://localhost:4321';
 
-    const isLocalhost = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
+    // Bepaal de base URL vanuit de binnenkomende request zodat dit
+    // automatisch werkt op zowel localhost als productie (Render).
+    // Render zet x-forwarded-proto op 'https'; lokaal valt het terug op 'http'.
+    const proto = request.headers.get('x-forwarded-proto') || 'http';
+    const host  = request.headers.get('host');
+    const baseUrl = proto + '://' + host;
+
+    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
 
     const payment = await mollie.payments.create({
-      amount: { currency: 'EUR', value: pkg.price },
+      amount:      { currency: 'EUR', value: pkg.price },
       description: pkg.label,
-      method: 'ideal',
-      redirectUrl: `${baseUrl}/shop?payment=success`,
-      ...(!isLocalhost && { webhookUrl: `${baseUrl}/api/webhook` }),
-      metadata: { packageId, userId: String(user._id) }
+      method:      'ideal',
+      redirectUrl: baseUrl + '/shop?payment=success',
+      ...(!isLocalhost && { webhookUrl: baseUrl + '/api/webhook' }),
+      metadata:    { packageId, userId: String(user._id) }
     });
 
     await createPayment({
