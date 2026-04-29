@@ -47,7 +47,7 @@ export async function POST({ request }) {
       createdAt: new Date()
     });
 
-    return new Response(JSON.stringify({ paymentUrl: payment.getCheckoutUrl() }), { status: 200 });
+    return new Response(JSON.stringify({ paymentUrl: payment.getCheckoutUrl(), molliePaymentId: payment.id }), { status: 200 });
   } catch (e) {
     return new Response(JSON.stringify({ error: e?.message }), { status: 500 });
   }
