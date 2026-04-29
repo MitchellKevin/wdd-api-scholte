@@ -1,0 +1,48 @@
+---
+import '../styles/rules.css';
+
+const games = [
+  { slug: 'blackjack', label: 'Blackjack' },
+  { slug: 'roulette', label: 'Roulette' },
+  { slug: 'mines', label: 'Mines' },
+  { slug: 'poker', label: 'Poker' },
+];
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Spelregels — CMD Casino</title>
+  </head>
+  <body>
+
+    <header class="rules-header">
+      <a href="/" class="back-link">← Lobby</a>
+      <h1>Spelregels</h1>
+      <span></span>
+    </header>
+
+    <div class="rules-body">
+
+      <nav class="rules-sidebar">
+        {games.map(g => (
+          <button class="game-btn" data-slug={g.slug}>
+            {g.label}
+          </button>
+        ))}
+      </nav>
+
+      <main class="rules-content">
+        <div id="panel">
+          <div class="rules-placeholder">
+            Kies een spel om de spelregels te lezen
+          </div>
+        </div>
+      </main>
+
+    </div>
+
+    <script src="../scripts/rules.js"></script>
+  </body>
+</html>
