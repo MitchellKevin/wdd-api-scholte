@@ -591,4 +591,305 @@ Raakt snel overprikkeld. Wil snel de gewenste informatie vinden. Heeft baat bij 
 - Dubbel en split bij blackjack ✅
 - Leaderboard fixen ✅
 - Favicon toevoegen
-- Achtergrond bij het spelen is wat druk
+- Achtergrond bij het spelen is wat druk ✅
+
+## Procesverslag
+
+### Week 1
+
+**01/04**
+Vandaag kregen we de debrieving van het aankomende API project. Aan het onderwerp lagen geen limieten, zolang het je interesse had. Er waren wel technische eisen:
+
+- Code stack: Astro, JavaScript, CSS, Render
+- API's: 1× content API, 2× web API's
+
+**02/04 — Weeklijkse feedback**
+Het feedbackgesprek was al deze week in verband met goede vrijdag. Mijn concept: een gokwebsite, want ik vind een gokje op zijn tijd wel leuk. Als content API had ik de Deck of Cards API in gedachten om kaarten van te fetchen. Als web API's dacht ik aan LocalStorage en een databaseverbinding voor accountregistratie.
+
+> **Feedback van de docent:** Interessant idee, maar de database telt niet mee als web API — ik moest daarvoor een andere oplossing vinden.
+
+---
+
+### Week 2
+
+**08/04**
+Gewerkt aan de MVP van de blackjack game: UI, gameflow en gamelogica. Het lastigste onderdeel was de ace-logica — een aas kan 1 of 11 waard zijn afhankelijk van de rest van de hand.
+
+> *(screenshot volgt — MVP blackjack UI)*
+
+**Probleem:** bij twee azen klopte de waarde niet.
+**Oplossing:** loop die assen terugzet van 11 naar 1 zolang de hand over 21 is.
+
+```js
+// server/gameManager.js
+function handValue(hand) {
+  let total = 0;
+  let aceCount = 0;
+
+  for (const card of hand) {
+    if (card.rank === 'A') { aceCount++; total += 11; }
+    else if (['J', 'Q', 'K'].includes(card.rank)) total += 10;
+    else total += parseInt(card.rank, 10);
+  }
+
+  while (total > 21 && aceCount > 0) {
+    total -= 10;
+    aceCount--;
+  }
+  return total;
+}
+```
+
+**09/04**
+LocalStorage Web API toegevoegd zodat de spelstatus en het token bewaard blijven na een refresh. Hierdoor hoeft de gebruiker niet steeds opnieuw in te loggen.
+
+```js
+// token opslaan na inloggen
+localStorage.setItem('session', token);
+
+// bij elk paginabezoek uitlezen
+const token = localStorage.getItem('session');
+```
+
+**Weeklijkse feedback**
+*(notities volgen)*
+
+---
+
+### Week 3
+
+**15/04**
+Niet super veel gedaan vanwege de Smashing Conference. Wel gewerkt aan de UI op basis van andere casino-websites. Het thema is uiteindelijk CMD geworden. Coins heb ik vervangen door EC-punten om in het thema te blijven. Een CMD-shop toegevoegd waar je EC-punten kunt omwisselen voor vakken om zo je diploma te halen.
+
+> *(screenshot volgt — CMD thema lobby)*
+
+> *(screenshot volgt — vakken shop)*
+
+**16/04**
+MongoDB toegevoegd voor accounts. Het probleem was dat de MongoDB-verbinding bij elke request opnieuw werd aangemaakt, wat heel traag was.
+
+**Probleem:** nieuwe `MongoClient` per request → veel te traag.
+**Oplossing:** singleton patroon — één verbinding voor de hele serverlevensduur.
+
+```js
+// server/mongodb.js
+let database = null;
+
+export async function getDB() {
+  if (database) return database; // hergebruik bestaande verbinding
+
+  const client = new MongoClient(process.env.MONGODB_URI);
+  await client.connect();
+  database = client.db('blackjack');
+
+  // Gebruikersnamen uniek houden
+  await database.collection('users').createIndex({ username: 1 }, { unique: true });
+
+  return database;
+}
+```
+
+JWT-authenticatie toegevoegd zodat gebruikers ingelogd blijven. Het lastige was dat het token zowel via de `Authorization` header als via een cookie moest werken.
+
+```js
+// lib/auth.js
+export function getTokenFromRequest(request) {
+  const auth = request.headers.get('authorization');
+  if (auth?.startsWith('Bearer ')) return auth.slice(7);
+
+  const cookieHeader = request.headers.get('cookie') || '';
+  const cookies = Object.fromEntries(
+    cookieHeader.split(';').map(s => {
+      const eq = s.trim().indexOf('=');
+      return [s.slice(0, eq).trim(), s.slice(eq + 1).trim()];
+    })
+  );
+  return cookies.session || null;
+}
+```
+
+Doctor Who easter egg: accountnamen die "cyd" bevatten krijgen automatisch het Doctor Who-profiel foto als avatar.
+
+> *(screenshot volgt — easter egg avatar op account- en leaderboardpagina)*
+
+```js
+// src/scripts/account.js
+if (me.username.toLowerCase().includes('cyd')) {
+  avatarEl.innerHTML = '<img src="/easter-egg.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+}
+
+// src/scripts/leaderboard.js
+if (p.username.toLowerCase().includes('cyd')) {
+  img.src = '/easter-egg.png';
+}
+```
+
+**Weeklijkse feedback**
+*(notities volgen)*
+
+---
+
+### Week 4
+
+**22/04**
+Mollie API geïntegreerd voor betalingen (test-omgeving).
+
+> *(screenshot volgt — Mollie betaalpagina / iDEAL checkout)* Het lastigste was de webhook — Mollie stuurt een betaalstatus terug naar de server, maar lokaal is de server niet bereikbaar van buiten. Oplossing: webhook alleen inschakelen als de app op productie draait.
+
+**Probleem:** webhookUrl instellen terwijl localhost niet bereikbaar is van buitenaf.
+**Oplossing:** dynamisch de base-URL bepalen vanuit de request headers, en webhook overslaan op localhost.
+
+```js
+// src/pages/api/create-payment.js
+const proto   = request.headers.get('x-forwarded-proto') || 'http';
+const host    = request.headers.get('host');
+const baseUrl = `${proto}://${host}`;
+const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+
+const payment = await mollie.payments.create({
+  amount:      { currency: 'EUR', value: pkg.price },
+  description: pkg.label,
+  method:      'ideal',
+  redirectUrl: `${baseUrl}/shop?payment=success`,
+  ...(!isLocal && { webhookUrl: `${baseUrl}/api/webhook` }),
+  metadata:    { packageId, userId: String(user._id) },
+});
+```
+
+**23/04**
+Leaderboard en de vakken-shop afgemaakt. WebSockets toegevoegd voor multiplayer blackjack.
+
+> *(screenshot volgt — leaderboard)*
+
+> *(screenshot volgt — multiplayer blackjack met meerdere spelers)* Het moeilijkste was de spelstatus synchroon houden tussen meerdere clients — als één speler een kaart trekt moet iedereen in de kamer dat direct zien.
+
+**Probleem:** spelstatus out-of-sync bij meerdere spelers.
+**Oplossing:** rooms opslaan in een server-side `Map`, bij elke spelactie de volledige `ROOM_UPDATE` naar alle spelers in die room broadcasten.
+
+```js
+// server/gameManager.js
+const rooms = new Map();
+
+function broadcastRoom(roomId, wss) {
+  const room = rooms.get(roomId);
+  if (!room) return;
+  const msg = JSON.stringify({ type: 'ROOM_UPDATE', room: sanitizeRoom(room) });
+  for (const [ws, player] of room.players) {
+    if (ws.readyState === ws.OPEN) ws.send(msg);
+  }
+}
+```
+
+**Weeklijkse feedback**
+*(notities volgen)*
+
+---
+
+### Week 5
+
+**29/04**
+Roulette en Mines spellen toegevoegd.
+
+> *(screenshot volgt — roulette)*
+
+> *(screenshot volgt — mines grid)* Bij Mines moest ik voorkomen dat de browser weet waar de mijnen liggen (anders zou je kunnen cheaten via de DevTools).
+
+**Probleem:** mijnposities nooit naar de browser sturen, maar toch een spelstate bewaren.
+**Oplossing:** posities server-side opslaan in een `Map` met een `gameId` als sleutel. Browser krijgt alleen de `gameId` terug.
+
+```js
+// server/minesState.js
+const sessions = new Map();
+
+export function createSession(userId, bet, mineCount, minePositions) {
+  const id = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+  sessions.set(id, { userId, bet, mineCount, minePositions, revealed: new Set(), status: 'active' });
+
+  // Automatisch opruimen na 15 minuten (verlaten spellen)
+  setTimeout(() => sessions.delete(id), 15 * 60 * 1000);
+
+  return id;
+}
+
+export function revealTile(id, index) {
+  const session = sessions.get(id);
+  if (session.minePositions.has(index)) {
+    session.status = 'lost';
+    return { mine: true };
+  }
+  session.revealed.add(index);
+  return { mine: false };
+}
+```
+
+**30/04**
+Multiplayer Poker (Texas Hold'em) toegevoegd. De achtergrond van de spelschermen aangepast want die was te druk. ElevenLabs TTS geïntegreerd voor een live dealer-stem en geluidseffecten.
+
+> *(screenshot volgt — poker tafel)*
+
+> *(screenshot volgt — nieuwe spelachtergrond vergeleken met de oude)*
+
+**Probleem:** ElevenLabs aanroepen bij elke dealeruitspraak was traag en verbruikte API-credits.
+**Oplossing:** server-side in-memory cache — als dezelfde zin al eerder is uitgesproken, wordt het opgeslagen audio-fragment direct teruggegeven.
+
+```js
+// src/pages/api/tts.js
+const cache = new Map();
+
+export async function GET({ request }) {
+  const text = new URL(request.url).searchParams.get('text');
+
+  if (cache.has(text)) {
+    return new Response(cache.get(text), {
+      headers: { 'Content-Type': 'audio/mpeg', 'Cache-Control': 'public, max-age=86400' },
+    });
+  }
+
+  const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    method: 'POST',
+    headers: { 'xi-api-key': apiKey, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
+    body: JSON.stringify({ text, model_id: 'eleven_multilingual_v2' }),
+  });
+
+  const audio = await res.arrayBuffer();
+  cache.set(text, audio); // bewaar voor volgende keer
+  return new Response(audio, { headers: { 'Content-Type': 'audio/mpeg' } });
+}
+```
+
+Wikipedia (MediaWiki) content API toegevoegd op de Rules-pagina zodat spelers de spelregels kunnen lezen.
+
+> *(screenshot volgt — rules pagina met Wikipedia content)*
+
+**Probleem:** Wikipedia-artikelen zijn groot en bevatten veel onnodige secties. Bovendien wilde ik Wikipedia niet bij elk paginabezoek aanroepen.
+**Oplossing:** platte tekst ophalen, met regex splitsen op kopjes, en 1 uur cachen.
+
+```js
+// src/pages/api/rules.json.js
+const cache = new Map();
+const TTL_MS = 60 * 60 * 1000;
+
+async function fetchWiki(wikiPage) {
+  const cached = cache.get(wikiPage);
+  if (cached && Date.now() < cached.expires) return cached.data;
+
+  const params = new URLSearchParams({
+    action: 'query', titles: wikiPage,
+    prop: 'extracts|pageimages', explaintext: 'true',
+    format: 'json', origin: '*',
+  });
+
+  const res  = await fetch(`https://nl.wikipedia.org/w/api.php?${params}`);
+  const d    = await res.json();
+  const page = Object.values(d.query.pages)[0];
+
+  // Splits platte tekst op == Kopjes ==
+  const sections = page.extract.split(/\n+(==+)\s*(.+?)\s*\1\n/);
+
+  cache.set(wikiPage, { data: sections, expires: Date.now() + TTL_MS });
+  return sections;
+}
+```
+
+**Weeklijkse feedback**
+*(notities volgen)*
