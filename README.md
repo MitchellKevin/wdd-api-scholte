@@ -615,7 +615,8 @@ Het feedbackgesprek was al deze week in verband met goede vrijdag. Mijn concept:
 **08/04**
 Gewerkt aan de MVP van de blackjack game: UI, gameflow en gamelogica. Het lastigste onderdeel was de ace-logica — een aas kan 1 of 11 waard zijn afhankelijk van de rest van de hand.
 
-> *(screenshot volgt — MVP blackjack UI)*
+MVP Blackjack single player:
+![alt text](image-12.png)
 
 **Probleem:** bij twee azen klopte de waarde niet.
 **Oplossing:** loop die assen terugzet van 11 naar 1 zolang de hand over 21 is.
