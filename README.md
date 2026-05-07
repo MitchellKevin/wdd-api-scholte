@@ -635,6 +635,3 @@ async function fetchWiki(wikiPage) {
   return sections;
 }
 ```
-
-**Weeklijkse feedback**
-*(notities volgen)*
