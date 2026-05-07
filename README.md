@@ -606,7 +606,8 @@ Vandaag kregen we de debrieving van het aankomende API project. Aan het onderwer
 **02/04 — Weeklijkse feedback**
 Het feedbackgesprek was al deze week in verband met goede vrijdag. Mijn concept: een gokwebsite, want ik vind een gokje op zijn tijd wel leuk. Als content API had ik de Deck of Cards API in gedachten om kaarten van te fetchen. Als web API's dacht ik aan LocalStorage en een databaseverbinding voor accountregistratie.
 
-> **Feedback van de docent:** Interessant idee, maar de database telt niet mee als web API — ik moest daarvoor een andere oplossing vinden.
+> **Feedback van de docent:** 
+Interessant idee, maar de database telt niet mee als web API. Ik moest daarvoor een andere api voor vinden om aan de eisen te voldoen.
 
 ---
 
@@ -653,14 +654,14 @@ const token = localStorage.getItem('session');
 ```
 
 **Weeklijkse feedback**
-*(notities volgen)*
+Ik had hier de MVP gemaakt, maar de docent vond de layout slordig en moest hier op focussen voordat ik verder ging met complexere onderwerpen als de mollie api en database. Verder miste ik nog de content api, maar wilde eigenlijk niet meer de kaarten api gebruiken gezien ik zelf de kaarten al had gemaakt en hier alle vrijheid voor had als ik ze nog wilde aanpassen.
 
 ---
 
 ### Week 3
 
 **15/04**
-Niet super veel gedaan vanwege de Smashing Conference. Wel gewerkt aan de UI op basis van andere casino-websites. Het thema is uiteindelijk CMD geworden. Coins heb ik vervangen door EC-punten om in het thema te blijven. Een CMD-shop toegevoegd waar je EC-punten kunt omwisselen voor vakken om zo je diploma te halen.
+Best veel gedaan ondanks de Smashing Conference waar ik heen was. Gewerkt aan de UI op basis van andere casino-websites. Het thema is uiteindelijk CMD geworden. Coins heb ik vervangen door EC-punten om in het thema te blijven. Een CMD-shop toegevoegd waar je EC-punten kunt omwisselen voor vakken om zo je diploma te halen.
 
 CMD thema lobby:
 ![alt text](image.png)
@@ -732,7 +733,7 @@ if (p.username.toLowerCase().includes('cyd')) {
 ```
 
 **Weeklijkse feedback**
-*(notities volgen)*
+Was geen feedback rond, wegens 'de web you want'.
 
 ---
 
@@ -796,7 +797,7 @@ function broadcastRoom(roomId, wss) {
 ```
 
 **Weeklijkse feedback**
-*(notities volgen)*
+De docent vond het werk cool dat we nu multiplayer blackjack konden spelen, ondanks ze niet erg van dit soort spellen is. Ze vond de easter egg met de docktor who ook leuk. UI was veel beter, maar er was wel nog 2 critique puntjes. De eerste was dat tijdens het spelen de achtergrond te afleidend was en het zou moeten gaan over de kaarten en dat de drukke achtergrond dit in de weg stond, verder nog dat ik nog steeds een content api miste en ze suggereerde een sound api. Maar die heb ik later toegevoegd maar de api was een web api en geen content dus miste die nog steeds. Later heb ik wegens bij vele gebrek an kennis van de spellen een probleem was een info scherm gemaakt voor elk spel(behalve mines, die was er nog niet is te modern spel).
 
 ---
 
@@ -912,6 +913,3 @@ async function fetchWiki(wikiPage) {
   return sections;
 }
 ```
-
-**Weeklijkse feedback**
-*(notities volgen)*
