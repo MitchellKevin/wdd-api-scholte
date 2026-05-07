@@ -846,7 +846,8 @@ Multiplayer Poker (Texas Hold'em) toegevoegd. De achtergrond van de spelschermen
 Poker tafel:
 ![alt text](image-9.png)
 
-> *(screenshot volgt — nieuwe spelachtergrond vergeleken met de oude)*
+Oude achtergrond:
+![alt text](image-11.png)
 
 **Probleem:** ElevenLabs aanroepen bij elke dealeruitspraak was traag en verbruikte API-credits.
 **Oplossing:** server-side in-memory cache — als dezelfde zin al eerder is uitgesproken, wordt het opgeslagen audio-fragment direct teruggegeven.
