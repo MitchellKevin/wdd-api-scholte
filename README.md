@@ -542,7 +542,7 @@ esc('<script>alert(1)</script>')
 
 - Astro documentatie: https://docs.astro.build/en/getting-started/
 - Astro Node.js adapter: https://docs.astro.build/en/guides/integrations-guide/node/
-- WebSocket (ws package): https://github.com/websockets/ws
+- WebSocket (ws package): https://github.com/websockets/ws & https://medium.com/@leomofthings/building-a-node-js-websocket-server-a-practical-guide-b164902a0c99
 - MongoDB Node.js driver: https://www.mongodb.com/docs/drivers/node/current/
 - JWT (jsonwebtoken): https://github.com/auth0/node-jsonwebtoken
 - Bcrypt wachtwoord-hashing: https://github.com/kelektiv/node.bcrypt.js
