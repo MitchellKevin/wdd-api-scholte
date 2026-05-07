@@ -661,9 +661,11 @@ const token = localStorage.getItem('session');
 **15/04**
 Niet super veel gedaan vanwege de Smashing Conference. Wel gewerkt aan de UI op basis van andere casino-websites. Het thema is uiteindelijk CMD geworden. Coins heb ik vervangen door EC-punten om in het thema te blijven. Een CMD-shop toegevoegd waar je EC-punten kunt omwisselen voor vakken om zo je diploma te halen.
 
-> *(screenshot volgt — CMD thema lobby)*
+CMD thema lobby:
+![alt text](image.png)
 
-> *(screenshot volgt — vakken shop)*
+Vakken shop:
+![alt text](image-1.png)
 
 **16/04**
 MongoDB toegevoegd voor accounts. Het probleem was dat de MongoDB-verbinding bij elke request opnieuw werd aangemaakt, wat heel traag was.
@@ -710,7 +712,11 @@ export function getTokenFromRequest(request) {
 
 Doctor Who easter egg: accountnamen die "cyd" bevatten krijgen automatisch het Doctor Who-profiel foto als avatar.
 
-> *(screenshot volgt — easter egg avatar op account- en leaderboardpagina)*
+Easter egg avatar:
+![alt text](image-2.png)
+
+Leaderbord met easter egg:
+![alt text](image-5.png)
 
 ```js
 // src/scripts/account.js
@@ -734,7 +740,10 @@ if (p.username.toLowerCase().includes('cyd')) {
 **22/04**
 Mollie API geïntegreerd voor betalingen (test-omgeving).
 
-> *(screenshot volgt — Mollie betaalpagina / iDEAL checkout)* Het lastigste was de webhook — Mollie stuurt een betaalstatus terug naar de server, maar lokaal is de server niet bereikbaar van buiten. Oplossing: webhook alleen inschakelen als de app op productie draait.
+Mollie betaalpagina(test omgeving):
+![alt text](image-4.png)
+
+Het lastigste was de webhook — Mollie stuurt een betaalstatus terug naar de server, maar lokaal is de server niet bereikbaar van buiten. Oplossing: webhook alleen inschakelen als de app op productie draait.
 
 **Probleem:** webhookUrl instellen terwijl localhost niet bereikbaar is van buitenaf.
 **Oplossing:** dynamisch de base-URL bepalen vanuit de request headers, en webhook overslaan op localhost.
@@ -759,9 +768,14 @@ const payment = await mollie.payments.create({
 **23/04**
 Leaderboard en de vakken-shop afgemaakt. WebSockets toegevoegd voor multiplayer blackjack.
 
-> *(screenshot volgt — leaderboard)*
+Leaderbord:
+![alt text](image-3.png)
 
-> *(screenshot volgt — multiplayer blackjack met meerdere spelers)* Het moeilijkste was de spelstatus synchroon houden tussen meerdere clients — als één speler een kaart trekt moet iedereen in de kamer dat direct zien.
+
+Blackjack multiplayer:
+![alt text](image-6.png)
+
+Het moeilijkste was de spelstatus synchroon houden tussen meerdere clients — als één speler een kaart trekt moet iedereen in de kamer dat direct zien.
 
 **Probleem:** spelstatus out-of-sync bij meerdere spelers.
 **Oplossing:** rooms opslaan in een server-side `Map`, bij elke spelactie de volledige `ROOM_UPDATE` naar alle spelers in die room broadcasten.
@@ -790,9 +804,13 @@ function broadcastRoom(roomId, wss) {
 **29/04**
 Roulette en Mines spellen toegevoegd.
 
-> *(screenshot volgt — roulette)*
+Roulette:
+![alt text](image-7.png)
 
-> *(screenshot volgt — mines grid)* Bij Mines moest ik voorkomen dat de browser weet waar de mijnen liggen (anders zou je kunnen cheaten via de DevTools).
+Mines:
+![alt text](image-8.png)
+
+Bij Mines moest ik voorkomen dat de browser weet waar de mijnen liggen (anders zou je kunnen cheaten via de DevTools).
 
 **Probleem:** mijnposities nooit naar de browser sturen, maar toch een spelstate bewaren.
 **Oplossing:** posities server-side opslaan in een `Map` met een `gameId` als sleutel. Browser krijgt alleen de `gameId` terug.
@@ -825,7 +843,8 @@ export function revealTile(id, index) {
 **30/04**
 Multiplayer Poker (Texas Hold'em) toegevoegd. De achtergrond van de spelschermen aangepast want die was te druk. ElevenLabs TTS geïntegreerd voor een live dealer-stem en geluidseffecten.
 
-> *(screenshot volgt — poker tafel)*
+Poker tafel:
+![alt text](image-9.png)
 
 > *(screenshot volgt — nieuwe spelachtergrond vergeleken met de oude)*
 
@@ -859,7 +878,8 @@ export async function GET({ request }) {
 
 Wikipedia (MediaWiki) content API toegevoegd op de Rules-pagina zodat spelers de spelregels kunnen lezen.
 
-> *(screenshot volgt — rules pagina met Wikipedia content)*
+Wikipedia content API:
+![alt text](image-10.png)
 
 **Probleem:** Wikipedia-artikelen zijn groot en bevatten veel onnodige secties. Bovendien wilde ik Wikipedia niet bij elk paginabezoek aanroepen.
 **Oplossing:** platte tekst ophalen, met regex splitsen op kopjes, en 1 uur cachen.
