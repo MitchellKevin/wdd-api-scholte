@@ -1,249 +1,6 @@
-# Blackjack Platform
-
-Een full-stack multiplayer blackjack applicatie gebouwd met Astro, Node.js en MongoDB. Spelers kunnen accounts aanmaken, coins verdienen, echte betalingen doen via Mollie en realtime tegen elkaar spelen.
-
----
-
-## Features
-
-- **Multiplayer blackjack** — realtime gameplay via WebSockets (max 4 spelers per tafel)
-- **Authenticatie** — registreren, inloggen en sessies via JWT
-- **EC systeem** — dagelijkse beloningen en EC-Punten kopen via Mollie-betalingen
-- **Leaderboard** — ranglijst van spelers op basis van score
-- **Shop** — EC-Punten kopen met iDEAL/andere betaalmethoden
-- **Responsieve UI** — responsive CSS styling
-
----
-
-## Tech Stack
-
-| Laag | Technologie |
-|------|------------|
-| Frontend | [Astro](https://astro.build) (SSR) |
-| Backend | Node.js + custom HTTP/WS server |
-| Database | MongoDB |
-| Realtime | WebSocket (`ws`) |
-| Betalingen | [Mollie API](https://docs.mollie.com) |
-| Auth | JWT + bcrypt |
-| Provider | Render |
-
----
-
-## Vereisten
-
-- Node.js >= 22.12.0
-- MongoDB instantie (lokaal of Atlas)
-- Mollie API key (voor betalingen)
-
----
-
-## Installatie
-
-```bash
-# Dependencies installeren
-npm install
-
-# Omgevingsvariabelen instellen
-cp .env.example .env
-
-# Development server starten
-npm run dev
-
-# Of de productieserver starten
-npm start
-```
-
----
-
-## Omgevingsvariabelen
-
-Maak een `.env` bestand aan in de root met de volgende variabelen:
-
-```env
-MONGODB_URI=mongodb://localhost:27017/blackjack
-JWT_SECRET=jouw_geheime_sleutel
-MOLLIE_API_KEY=test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
----
-
-## Scripts
-
-| Commando | Omschrijving |
-|----------|-------------|
-| `npm run dev` | Start de Astro dev server op `localhost:4321` |
-| `npm run build` | Bouwt de productieversie naar `./dist/` |
-| `npm run preview` | Preview van de gebouwde site |
-| `npm start` | Start de Node.js productieserver (`server.mjs`) |
-
----
-
-## Projectstructuur
-
-```
-/
-├── public/               # Statische assets (CSS, client-side JS)
-│   ├── client.js         # WebSocket client
-│   ├── blackjack.js      # Blackjack spellogica (client)
-│   └── shop.js           # Shop functionaliteit (client)
-├── server/               # Server-side modules
-│   ├── websocket.js      # WebSocket server & berichtenafhandeling
-│   ├── gameManager.js    # Blackjack spellogica (server)
-│   ├── db.js             # Database helperfuncties (coins, scores)
-│   └── mongodb.js        # MongoDB verbinding
-├── src/
-│   └── pages/
-│       ├── index.astro       # Lobby / startpagina
-│       ├── blackjack.astro   # Spelscherm
-│       ├── account.astro     # Accountoverzicht
-│       ├── shop.astro        # Coin shop
-│       ├── leaderboard.astro # Ranglijst
-│       ├── login.astro       # Inloggen
-│       ├── signup.astro      # Registreren
-│       └── api/              # API endpoints
-│           ├── auth/
-│           ├── login.js
-│           ├── signup.js
-│           ├── score.json.js
-│           ├── balance.json.js
-│           ├── daily-reward.js
-│           ├── create-payment.js
-│           └── payment-webhook.json.js
-├── lib/                  # Gedeelde serverlogica (auth, helpers)
-├── server.mjs            # Entrypoint productieserver
-└── astro.config.mjs      # Astro configuratie
-```
-
----
-
-## API Overzicht
-
-| Methode | Endpoint | Omschrijving |
-|---------|----------|-------------|
-| POST | `/api/signup` | Nieuw account aanmaken |
-| POST | `/api/login` | Inloggen, JWT ontvangen |
-| GET | `/api/me` | Ingelogde gebruikersdata |
-| GET | `/api/balance` | Huidige coin balance |
-| GET | `/api/score.json` | Score opvragen |
-| POST | `/api/daily-reward` | Dagelijkse beloning claimen |
-| POST | `/api/create-payment` | Mollie betaling starten |
-| POST | `/api/payment-webhook` | Mollie betaalstatus verwerken |
-| GET | `/api/leaderboard.json` | Ranglijst opvragen |
-
----
-
-## WebSocket Protocol
-
-De WebSocket server draait op `/ws`. Berichten zijn JSON-objecten met een `type` veld.
-
-**Client → Server**
-
-| Type | Omschrijving |
-|------|-------------|
-| `PING` | Verbinding testen |
-| `JOIN_TABLE` | Aan een tafel aanschuiven |
-| `HIT` | Kaart trekken |
-| `STAND` | Passen |
-| `BET` | Inzet plaatsen |
-
-**Server → Client**
-
-| Type | Omschrijving |
-|------|-------------|
-| `WELCOME` | Verbinding bevestigd + client ID |
-| `TABLE_LIST` | Lijst van beschikbare tafels |
-| `GAME_STATE` | Volledige spelstatus |
-| `CARD_DEALT` | Nieuwe kaart gedeeld |
-| `ERROR` | Foutmelding |
-| `PONG` | Ping-antwoord |
-
-Design inspo:
-![alt text](pokerInspo.png)
-
-
-
-
-Weekly nerd:
-Johan Huijkman
-
-Een screen reader die de hele pagina voor leest is heel frusterend. Het is bij toegankelijkheid belangrijk om de groep voor wie het is erbij te betrekken. Die vier hoekstukken van WCAG zijn Perceivable, Operable, Understandalbe and Robust. WCAG = Web Content Accessibility Guidelines. Stop niet bij alleen het volgen van de WCAG, maar in gesprek te gaan met de doelgroep met de beperking. Als de afbeelding geen toegvoegde waarde heeft, kan je het bestempelen als decoratief en kan hij leeg gelaten worden. Een schermlezer heeft al veel functies hebben en daar moet je rekening mee houden. Bijvoorbeeld met skip content dingen, hier moet je ook kijken of een schermlezer dat niet zelf al kan. Formulierregelaars, lijstjes zijn een functies van een screenreader om sneller bij je doel te komen. Cookies bovenaan is fijn, want die kan je dan gelijk weg klinken
-
-Martijn
-Wat maakt het voor hem/haar moeilijk?
-Lange stukken tekst raakt hij moe of zijn concentratie kwijt. Header irritant dat die vergroot als je scrolt. Vervelend als er geen feedback is bijv bij een knop die niet interacteert met hover. 
-
-Schaalbaarheid, contrast, gerelateerde informatie bij elkaar, visuele indicatoren zoals een focusrand.
-
-Wat heeft hij/zij nodig?
-Elementen die interacteren met bijv hover. 
-
-Op welk moment denk dat hij/zij was afgehaakt in iets wat je hebt gemaakt?
-Soms vallen dingen buiten het scherm als je erg inzoomt. 
-
-Naduah mobiliteitsproblemen
-Wat maakt het voor hem/haar moeilijk?
-Velle kleuren dit triggerd kleuren, heel veel informatie door elkaar staat(vermoeiend en verminderd concetratie) of als ze heel lang moet zoeken
-
-Wat heeft hij/zij nodig?
-Dark/Light mode functie
-
-Rustige layout en vormgeving, gevens moeten wroden opgeslagen
-
-Op welk moment denk dat hij/zij was afgehaakt in iets wat je hebt gemaakt?
-Als ze te lang moet zoeken
-
-Guido 
-Wat maakt het voor hem/haar moeilijk?
-Snel overprikkeld, moet heel concreet zijn als hij iets moet doen, hij wil heel snel de informatie krijgen waar hij naar opzoek is.
-
-Wat heeft hij/zij nodig?
-Rusige layout, duidelijke instructies en meldingen en voorspelbaarheid
-
-Op welk moment denk dat hij/zij was afgehaakt in iets wat je hebt gemaakt?
-
-TODO:
-* Mollie API Payment system
-* LocalStorage API
-* MongoDB Database
-* Leaderboard
-* Websockets API Multiplayer
-* (Optional) Poker
-
-Feedback
-* Geluid toevoegen, content api[]
-* Layout netter maken letten op focus op ruimte [X]
-* Multiplayer[] toevoegen wel belangrijk nog om voor de webAPI en localStorage niet vergeten[X]
-* Focus eerst op het mooi maken daarna op de extra features zoals de database en payment system.[X]
-* Poker laten zitten
-* Niet te ingewikkeld maken
-
-* Dubbel en split toevoegen [x]
-* Studiepunten ipv coins is leuker voor een CMD casino [x]
-* CMD style toepassen[x]
-* Vakken [x]
-* Easter Egg / als cyd account met profiel foto van cyd 10 M
-* Refactor file structure 1U [x]
-* Multiplayer (websockets werkend krijgen) 10U
-* Leaderbord fixen 5M [x]
-* Database werkend krijgen online 30M
-* CRUD toevoegen bij gebruikers
-
-Feedback:
-* Background bij spelen is bit much
-* Mist een content api, (dit wordt nu een ElevenLabs API voor dealer voice). Verder nog sounds voor 
-Card deal sounds, Chip stack clicks, Win / blackjack stingers, Bust sound, Background lounge music, 
-Mute / volume sliders, Smooth fade transitions met web native
-* Duidelijker maken wie aan de beurt is bij multiplayer
-* Favicon toevoegen
-
-
-
-
-
-
 # CMD Casino
 
-Een full-stack multiplayer casinoplatform gebouwd als schoolproject voor de opleiding Communication and Multimedia Design. Spelers kunnen meerdere casinospellen spelen, coins verdienen en echte betalingen doen.
+Een full-stack multiplayer casinoplatform gebouwd als schoolproject voor de opleiding Communication and Multimedia Design. Spelers kunnen meerdere casinospellen spelen, EC-punten verdienen en echte betalingen doen.
 
 ---
 
@@ -397,8 +154,8 @@ ELEVENLABS_API_KEY=jouw_sleutel
 
 | Methode | Endpoint | Omschrijving |
 |---------|----------|-------------|
-| GET | `/api/balance.json` | Huidige coin-balans opvragen |
-| POST | `/api/daily-reward` | Dagelijkse gratis coins claimen (1× per dag) |
+| GET | `/api/balance.json` | Huidige EC-balans opvragen |
+| POST | `/api/daily-reward` | Dagelijkse gratis EC-punten claimen (1× per dag) |
 | GET | `/api/leaderboard.json` | Top-ranglijst van spelers |
 
 ### Mines-spel
@@ -522,7 +279,7 @@ De regex `/\n+(==+)\s*(.+?)\s*\1\n/` werkt als volgt:
 2. Server  → stuurt betaal-URL terug     → browser stuurt gebruiker daarheen
 3. Gebruiker betaalt op Mollie-pagina
 4. Mollie  → POST /api/payment-webhook   → server controleert status bij Mollie
-5. Server  → schrijft coins bij in database
+5. Server  → schrijft EC-punten bij in database
 ```
 
 Dit webhook-patroon is nodig omdat de gebruiker de pagina verlaat om te betalen — we kunnen niet wachten op een callback in dezelfde verbinding.
@@ -560,23 +317,7 @@ esc('<script>alert(1)</script>')
 
 ## Design inspiratie
 
-![Poker tafel inspiratie](pokerInspo.png)
-
----
-
-## Weekly Nerd aantekeningen
-
-**Johan Huijkman — Toegankelijkheid**
-Een schermlezer die de hele pagina voorleest is frustrerend. Betrek de doelgroep actief. De vier pijlers van WCAG zijn: Perceivable, Operable, Understandable en Robust. Stop niet bij WCAG, maar ga in gesprek met mensen met een beperking. Decoratieve afbeeldingen mogen een leeg `alt`-attribuut krijgen. Schermlezergebruikers hebben al ingebouwde navigatiefuncties — voeg die niet dubbel toe.
-
-**Martijn**
-Lange stukken tekst zijn vermoeiend. Geen hover-feedback bij knoppen is irritant. Heeft baat bij goed contrast, gerelateerde informatie bij elkaar en zichtbare focusranden.
-
-**Naduah — Mobiliteitsproblemen**
-Felle kleuren en veel informatie tegelijk zijn vermoeiend. Heeft baat bij een dark/light-mode, rustige layout en het automatisch opslaan van gegevens.
-
-**Guido**
-Raakt snel overprikkeld. Wil snel de gewenste informatie vinden. Heeft baat bij duidelijke instructies, meldingen en voorspelbaarheid.
+![Poker tafel inspiratie](assets/pokerInspo.svg)
 
 ---
 
@@ -590,8 +331,10 @@ Raakt snel overprikkeld. Wil snel de gewenste informatie vinden. Heeft baat bij 
 - Vakken-pagina ✅
 - Dubbel en split bij blackjack ✅
 - Leaderboard fixen ✅
-- Favicon toevoegen
+- Favicon toevoegen ✅
 - Achtergrond bij het spelen is wat druk ✅
+
+---
 
 ## Procesverslag
 
@@ -607,7 +350,7 @@ Vandaag kregen we de debrieving van het aankomende API project. Aan het onderwer
 Het feedbackgesprek was al deze week in verband met goede vrijdag. Mijn concept: een gokwebsite, want ik vind een gokje op zijn tijd wel leuk. Als content API had ik de Deck of Cards API in gedachten om kaarten van te fetchen. Als web API's dacht ik aan LocalStorage en een databaseverbinding voor accountregistratie.
 
 > **Feedback van de docent:** 
-Interessant idee, maar de database telt niet mee als web API. Ik moest daarvoor een andere api voor vinden om aan de eisen te voldoen.
+Interessant idee, maar de database telt niet mee als web API — ik moest daarvoor een andere oplossing vinden.
 
 ---
 
@@ -616,8 +359,7 @@ Interessant idee, maar de database telt niet mee als web API. Ik moest daarvoor 
 **08/04**
 Gewerkt aan de MVP van de blackjack game: UI, gameflow en gamelogica. Het lastigste onderdeel was de ace-logica — een aas kan 1 of 11 waard zijn afhankelijk van de rest van de hand.
 
-MVP Blackjack single player:
-![alt text](image-12.png)
+![MVP Blackjack single player](image-12.png)
 
 **Probleem:** bij twee azen klopte de waarde niet.
 **Oplossing:** loop die assen terugzet van 11 naar 1 zolang de hand over 21 is.
@@ -654,20 +396,18 @@ const token = localStorage.getItem('session');
 ```
 
 **Weeklijkse feedback**
-Ik had hier de MVP gemaakt, maar de docent vond de layout slordig en moest hier op focussen voordat ik verder ging met complexere onderwerpen als de mollie api en database. Verder miste ik nog de content api, maar wilde eigenlijk niet meer de kaarten api gebruiken gezien ik zelf de kaarten al had gemaakt en hier alle vrijheid voor had als ik ze nog wilde aanpassen.
+Ik had hier de MVP gemaakt, maar de docent vond de layout slordig en moest hier op focussen voordat ik verder ging met complexere onderwerpen als de Mollie API en database. Verder miste ik nog de content API, maar wilde eigenlijk niet meer de kaarten-API gebruiken gezien ik zelf de kaarten al had gemaakt.
 
 ---
 
 ### Week 3
 
 **15/04**
-Best veel gedaan ondanks de Smashing Conference waar ik heen was. Gewerkt aan de UI op basis van andere casino-websites. Het thema is uiteindelijk CMD geworden. Coins heb ik vervangen door EC-punten om in het thema te blijven. Een CMD-shop toegevoegd waar je EC-punten kunt omwisselen voor vakken om zo je diploma te halen.
+Best veel gedaan ondanks de Smashing Conference. Gewerkt aan de UI op basis van andere casino-websites. Het thema is uiteindelijk CMD geworden. Coins heb ik vervangen door EC-punten om in het thema te blijven. Een CMD-shop toegevoegd waar je EC-punten kunt omwisselen voor vakken om zo je diploma te halen.
 
-CMD thema lobby:
-![alt text](image.png)
+![CMD thema lobby](image.png)
 
-Vakken shop:
-![alt text](image-1.png)
+![Vakken shop](image-1.png)
 
 **16/04**
 MongoDB toegevoegd voor accounts. Het probleem was dat de MongoDB-verbinding bij elke request opnieuw werd aangemaakt, wat heel traag was.
@@ -686,7 +426,6 @@ export async function getDB() {
   await client.connect();
   database = client.db('blackjack');
 
-  // Gebruikersnamen uniek houden
   await database.collection('users').createIndex({ username: 1 }, { unique: true });
 
   return database;
@@ -712,13 +451,11 @@ export function getTokenFromRequest(request) {
 }
 ```
 
-Doctor Who easter egg: accountnamen die "cyd" bevatten krijgen automatisch het Doctor Who-profiel foto als avatar.
+Doctor Who easter egg: accountnamen die "cyd" bevatten krijgen automatisch de Doctor Who profielfoto als avatar.
 
-Easter egg avatar:
-![alt text](image-2.png)
+![Easter egg avatar op accountpagina](image-2.png)
 
-Leaderbord met easter egg:
-![alt text](image-5.png)
+![Leaderboard met easter egg](image-5.png)
 
 ```js
 // src/scripts/account.js
@@ -733,19 +470,16 @@ if (p.username.toLowerCase().includes('cyd')) {
 ```
 
 **Weeklijkse feedback**
-Was geen feedback rond, wegens 'de web you want'.
+Geen feedback deze week — het was 'the web you want'.
 
 ---
 
 ### Week 4
 
 **22/04**
-Mollie API geïntegreerd voor betalingen (test-omgeving).
+Mollie API geïntegreerd voor betalingen (test-omgeving). Het lastigste was de webhook — Mollie stuurt een betaalstatus terug naar de server, maar lokaal is de server niet bereikbaar van buiten.
 
-Mollie betaalpagina(test omgeving):
-![alt text](image-4.png)
-
-Het lastigste was de webhook — Mollie stuurt een betaalstatus terug naar de server, maar lokaal is de server niet bereikbaar van buiten. Oplossing: webhook alleen inschakelen als de app op productie draait.
+![Mollie betaalpagina (test-omgeving)](image-4.png)
 
 **Probleem:** webhookUrl instellen terwijl localhost niet bereikbaar is van buitenaf.
 **Oplossing:** dynamisch de base-URL bepalen vanuit de request headers, en webhook overslaan op localhost.
@@ -768,16 +502,11 @@ const payment = await mollie.payments.create({
 ```
 
 **23/04**
-Leaderboard en de vakken-shop afgemaakt. WebSockets toegevoegd voor multiplayer blackjack.
+Leaderboard en de vakken-shop afgemaakt. WebSockets toegevoegd voor multiplayer blackjack. Het moeilijkste was de spelstatus synchroon houden tussen meerdere clients — als één speler een kaart trekt moet iedereen in de kamer dat direct zien.
 
-Leaderbord:
-![alt text](image-3.png)
+![Leaderboard](image-3.png)
 
-
-Blackjack multiplayer:
-![alt text](image-6.png)
-
-Het moeilijkste was de spelstatus synchroon houden tussen meerdere clients — als één speler een kaart trekt moet iedereen in de kamer dat direct zien.
+![Blackjack multiplayer](image-6.png)
 
 **Probleem:** spelstatus out-of-sync bij meerdere spelers.
 **Oplossing:** rooms opslaan in een server-side `Map`, bij elke spelactie de volledige `ROOM_UPDATE` naar alle spelers in die room broadcasten.
@@ -797,22 +526,18 @@ function broadcastRoom(roomId, wss) {
 ```
 
 **Weeklijkse feedback**
-De docent vond het werk cool dat we nu multiplayer blackjack konden spelen, ondanks ze niet erg van dit soort spellen is. Ze vond de easter egg met de docktor who ook leuk. UI was veel beter, maar er was wel nog 2 critique puntjes. De eerste was dat tijdens het spelen de achtergrond te afleidend was en het zou moeten gaan over de kaarten en dat de drukke achtergrond dit in de weg stond, verder nog dat ik nog steeds een content api miste en ze suggereerde een sound api. Maar die heb ik later toegevoegd maar de api was een web api en geen content dus miste die nog steeds. Later heb ik wegens bij vele gebrek an kennis van de spellen een probleem was een info scherm gemaakt voor elk spel(behalve mines, die was er nog niet is te modern spel).
+De docent vond het cool dat multiplayer blackjack werkte, ondanks ze niet erg van dit soort spellen is. Ze vond de easter egg met de Doctor Who ook leuk. De UI was veel beter, maar er waren twee kritiekpunten: de achtergrond tijdens het spelen was te afleidend en er miste nog steeds een content API. Ze suggereerde een sound API — maar dat bleek een web API te zijn, geen content API. Uiteindelijk heb ik een Wikipedia info-scherm gemaakt voor elk spel om dat op te lossen.
 
 ---
 
 ### Week 5
 
 **29/04**
-Roulette en Mines spellen toegevoegd.
+Roulette en Mines spellen toegevoegd. Bij Mines moest ik voorkomen dat de browser weet waar de mijnen liggen (anders zou je kunnen cheaten via de DevTools).
 
-Roulette:
-![alt text](image-7.png)
+![Roulette](image-7.png)
 
-Mines:
-![alt text](image-8.png)
-
-Bij Mines moest ik voorkomen dat de browser weet waar de mijnen liggen (anders zou je kunnen cheaten via de DevTools).
+![Mines grid](image-8.png)
 
 **Probleem:** mijnposities nooit naar de browser sturen, maar toch een spelstate bewaren.
 **Oplossing:** posities server-side opslaan in een `Map` met een `gameId` als sleutel. Browser krijgt alleen de `gameId` terug.
@@ -843,13 +568,11 @@ export function revealTile(id, index) {
 ```
 
 **30/04**
-Multiplayer Poker (Texas Hold'em) toegevoegd. De achtergrond van de spelschermen aangepast want die was te druk. ElevenLabs TTS geïntegreerd voor een live dealer-stem en geluidseffecten.
+Multiplayer Poker (Texas Hold'em) toegevoegd. De achtergrond van de spelschermen aangepast, die was te druk. ElevenLabs TTS geïntegreerd voor een live dealer stem en geluidseffecten.
 
-Poker tafel:
-![alt text](image-9.png)
+![Poker tafel](image-9.png)
 
-Oude achtergrond:
-![alt text](image-11.png)
+![Oude achtergrond (te druk)](image-11.png)
 
 **Probleem:** ElevenLabs aanroepen bij elke dealeruitspraak was traag en verbruikte API-credits.
 **Oplossing:** server-side in-memory cache — als dezelfde zin al eerder is uitgesproken, wordt het opgeslagen audio-fragment direct teruggegeven.
@@ -874,15 +597,14 @@ export async function GET({ request }) {
   });
 
   const audio = await res.arrayBuffer();
-  cache.set(text, audio); // bewaar voor volgende keer
+  cache.set(text, audio);
   return new Response(audio, { headers: { 'Content-Type': 'audio/mpeg' } });
 }
 ```
 
 Wikipedia (MediaWiki) content API toegevoegd op de Rules-pagina zodat spelers de spelregels kunnen lezen.
 
-Wikipedia content API:
-![alt text](image-10.png)
+![Rules pagina met Wikipedia content](image-10.png)
 
 **Probleem:** Wikipedia-artikelen zijn groot en bevatten veel onnodige secties. Bovendien wilde ik Wikipedia niet bij elk paginabezoek aanroepen.
 **Oplossing:** platte tekst ophalen, met regex splitsen op kopjes, en 1 uur cachen.
@@ -913,3 +635,6 @@ async function fetchWiki(wikiPage) {
   return sections;
 }
 ```
+
+**Weeklijkse feedback**
+*(notities volgen)*
