@@ -1,0 +1,47 @@
+---
+import '../styles/vakken.css';
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vakken — CMD Casino</title>
+  </head>
+  <body>
+    <header>
+      <h1>CMD Casino</h1>
+      <div class="header-right">
+        <div class="header-balance">Saldo: <strong id="hdr-balance">–</strong> EC</div>
+        <a href="/">← Terug naar lobby</a>
+      </div>
+    </header>
+
+    <div class="page">
+      <div class="page-header">
+        <h2>CMD Vakken</h2>
+        <p>Koop vakken met EC-Punten. Rond alles af voor je diploma.</p>
+      </div>
+
+      <div class="diploma" id="diploma-banner">
+        🎓 Gefeliciteerd — je hebt alle vakken gehaald en je diploma verdiend!
+      </div>
+
+      <div class="progress-block">
+        <div class="progress-meta">
+          <span id="progress-label">Laden…</span>
+          <span><b id="progress-pct">–</b></span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <div id="jaren-container"></div>
+      <p id="global-msg"></p>
+    </div>
+
+    <script src="../scripts/vakken.js"></script>
+  </body>
+</html>

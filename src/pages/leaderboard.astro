@@ -1,0 +1,40 @@
+---
+import '../styles/leaderboard.css';
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard — CMD Casino</title>
+  </head>
+  <body>
+    <header>
+      <h1>CMD Casino</h1>
+      <a href="/">← Terug naar lobby</a>
+    </header>
+
+    <div class="page">
+      <div class="page-header">
+        <h2>Leaderboard</h2>
+        <p>Top 10 spelers met de meeste EC-Punten</p>
+      </div>
+
+      <div class="col-headers">
+        <span style="text-align:center">#</span>
+        <span>Speler</span>
+        <span>EC-Punten</span>
+      </div>
+
+      <div id="loading">
+        <div class="spinner"></div>
+        Laden…
+      </div>
+      <div id="error">Kon leaderboard niet laden.</div>
+      <div id="list"></div>
+    </div>
+
+    <script src="../scripts/leaderboard.js"></script>
+  </body>
+</html>

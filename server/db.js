@@ -1,0 +1,120 @@
+import { ObjectId } from 'mongodb';
+import { getDB } from './mongodb.js';
+
+// ─── Coins ────────────────────────────────────────────────────────────────────
+
+export async function getBalance(userId) {
+  const db = await getDB();
+  const user = await db.collection('users').findOne(
+    { _id: new ObjectId(userId) },
+    { projection: { coins_amount: 1 } }
+  );
+  return user?.coins_amount ?? 0;
+}
+
+export async function setBalance(userId, amount) {
+  const db = await getDB();
+  await db.collection('users').updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { coins_amount: amount } }
+  );
+}
+
+export async function creditCoins(userId, amount) {
+  const db = await getDB();
+  await db.collection('users').updateOne(
+    { _id: new ObjectId(userId) },
+    { $inc: { coins_amount: amount } }
+  );
+}
+
+export async function deductCoins(userId, amount) {
+  const db = await getDB();
+
+  // Only deduct if the user has enough coins ($gte = greater than or equal)
+  const result = await db.collection('users').updateOne(
+    { _id: new ObjectId(userId), coins_amount: { $gte: amount } },
+    { $inc: { coins_amount: -amount } }
+  );
+
+  const success = result.modifiedCount === 1;
+  return success;
+}
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+export async function createPayment(data) {
+  const db = await getDB();
+  const result = await db.collection('payments').insertOne(data);
+  return result.insertedId;
+}
+
+export async function getPaymentByMollieId(mollieId) {
+  const db = await getDB();
+  return db.collection('payments').findOne({ molliePaymentId: mollieId });
+}
+
+export async function markPaymentPaid(mollieId) {
+  const db = await getDB();
+  await db.collection('payments').updateOne(
+    { molliePaymentId: mollieId },
+    { $set: { status: 'paid', paidAt: new Date() } }
+  );
+}
+
+// ─── Scores ───────────────────────────────────────────────────────────────────
+
+export async function saveScore(userId, score) {
+  const db = await getDB();
+  await db.collection('users').updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { score, scoreUpdatedAt: new Date() } }
+  );
+}
+
+export async function getScore(userId) {
+  const db = await getDB();
+  const user = await db.collection('users').findOne(
+    { _id: new ObjectId(userId) },
+    { projection: { score: 1, scoreUpdatedAt: 1 } }
+  );
+  return user ? { score: user.score ?? 0, updated_at: user.scoreUpdatedAt ?? null } : null;
+}
+
+// ─── Courses ──────────────────────────────────────────────────────────────────
+
+export async function getPurchasedCourses(userId) {
+  const db = await getDB();
+  const user = await db.collection('users').findOne(
+    { _id: new ObjectId(userId) },
+    { projection: { purchased_courses: 1 } }
+  );
+  return user?.purchased_courses ?? [];
+}
+
+export async function buyCourse(userId, courseId, price) {
+  const db = await getDB();
+  const result = await db.collection('users').updateOne(
+    {
+      _id: new ObjectId(userId),
+      coins_amount: { $gte: price },
+      purchased_courses: { $ne: courseId },
+    },
+    {
+      $inc: { coins_amount: -price },
+      $push: { purchased_courses: courseId },
+    }
+  );
+  return result.modifiedCount === 1;
+}
+
+// ─── Leaderboard ──────────────────────────────────────────────────────────────
+
+export async function getTopPlayers(limit = 10) {
+  const db = await getDB();
+  return db.collection('users')
+    .find({}, { projection: { username: 1, coins_amount: 1 } })
+    .sort({ coins_amount: -1 })
+    .limit(limit)
+    .toArray();
+}

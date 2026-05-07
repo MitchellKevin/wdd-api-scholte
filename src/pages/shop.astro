@@ -1,0 +1,49 @@
+---
+import '../styles/shop.css';
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop — CMD Casino</title>
+  </head>
+  <body>
+    <header>
+      <h1>CMD Shop</h1>
+      <a href="/">← Terug naar lobby</a>
+    </header>
+    <div class="page">
+
+      <div id="success-banner" style="display:none" class="success-banner">
+        Betaling ontvangen! Je EC-Punten zijn bijgeschreven.
+      </div>
+
+      <div class="packages">
+        <div class="pkg">
+          <div class="coins">60</div>
+          <div class="coins-label">EC-Punten</div>
+          <div class="price">€ 2,60</div>
+          <button data-pkg="p1">Kopen</button>
+        </div>
+        <div class="pkg pkg-popular">
+          <div class="popular-badge">Populair</div>
+          <div class="coins">120</div>
+          <div class="coins-label">EC-Punten</div>
+          <div class="price">€ 5,10</div>
+          <button data-pkg="p5">Kopen</button>
+        </div>
+        <div class="pkg">
+          <div class="coins">180</div>
+          <div class="coins-label">EC-Punten</div>
+          <div class="price">€ 7,60</div>
+          <button data-pkg="p10">Kopen</button>
+        </div>
+      </div>
+      <p id="msg"></p>
+    </div>
+
+    <script src="../scripts/shop.js"></script>
+  </body>
+</html>

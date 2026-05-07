@@ -1,0 +1,59 @@
+---
+import '../styles/index.css';
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Blackjack</title>
+  </head>
+  <body>
+    <header>
+      <h1>CMD Casino</h1>
+      <section>
+        <a href="/leaderboard"><img src="/leaderbordIcon.svg" alt="Leaderboard"></a>
+        <a href="/rules"><img src="/rulesIcon.svg" alt="Rules"></a>
+        <a href="/vakken"><img src="/subjectsIcon.svg" alt="Subjects"></a>
+        <a href="/shop"><img src="/shop.svg" alt="Shop"></a>
+        <a href="/account"><img src="/accountIcon.svg" alt="Account"></a>
+      </section>
+    </header>
+
+    <div id="logged-in" style="display:none">
+      <div class="lobby">
+        <div class="user-bar">
+          Welkom, <strong id="username">–</strong>
+          <span class="divider">|</span>
+           <strong id="EC-Punten">–</strong>
+        </div>
+        <div id="daily-msg" class="daily-badge" style="display:none"></div>
+        <div class="mode-form">
+          <button class="btn btn-solo" id="soloBtn">Blackjack</button>
+          <button class="btn btn-roulette" id="rouletteBtn">Roulette</button>
+          <button class="btn btn-mines" id="minesBtn">Mines</button>
+          <div class="mode-divider">of</div>
+          <div class="multi-row">
+            <input id="roomInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Kamer-nummer" maxlength="8" />
+            <div class="btn-row">
+              <button class="btn btn-multi" id="multiBtn">Blackjack</button>
+              <button class="btn btn-poker" id="pokerBtn">Poker</button>
+            </div>
+          </div>
+        </div>
+        <div id="msg"></div>
+      </div>
+    </div>
+
+    <div id="not-logged" class="not-logged" style="display:none">
+      <p>Maak een account aan of log in om te spelen.</p>
+      <div class="auth-btns">
+        <a href="/login" class="auth-btn auth-btn-primary">Inloggen</a>
+        <a href="/signup" class="auth-btn auth-btn-ghost">Registreren</a>
+      </div>
+    </div>
+
+    <script src="../scripts/index.js"></script>
+  </body>
+</html>

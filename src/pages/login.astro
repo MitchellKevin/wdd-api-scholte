@@ -1,0 +1,26 @@
+---
+import '../styles/login.css';
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inloggen — CMD Casino</title>
+  </head>
+  <body>
+    <div class="card">
+      <span class="card-icon">🃏</span>
+      <h2>Inloggen</h2>
+      <label for="username">Gebruikersnaam</label>
+      <input id="username" type="text" placeholder="jouw_naam" autocomplete="username" />
+      <label for="password">Wachtwoord</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      <button id="btn">Inloggen</button>
+      <p id="msg"></p>
+      <div class="footer-link">Nog geen account? <a href="/signup">Registreren</a></div>
+    </div>
+    <script src="../scripts/login.js"></script>
+  </body>
+</html>
